@@ -110,7 +110,7 @@ export function Dashboard() {
           </p>
         </div>
 
-        <div className="flex items-center justify-end w-full sm:w-auto">
+        <div className="hidden sm:flex items-center justify-end sm:w-auto">
           <Button
             variant="primary"
             size="normal"
@@ -242,6 +242,19 @@ export function Dashboard() {
             </table>
           </div>
         )}
+      </div>
+
+      {/* Mobile Fixed Bottom Create Invoice Button */}
+      <div className="sm:hidden fixed bottom-[calc(4rem+12px+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-40 no-print">
+        <Button
+          variant="primary"
+          size="normal"
+          icon={Plus}
+          onClick={() => navigate('/invoices/new')}
+          className="shadow-lg shadow-black/20 rounded-full px-5 py-2.5 font-semibold text-sm whitespace-nowrap active:scale-95 transition-transform"
+        >
+          Create Invoice
+        </Button>
       </div>
     </div>
   );

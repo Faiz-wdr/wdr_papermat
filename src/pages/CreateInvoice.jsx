@@ -247,9 +247,6 @@ export function CreateInvoice() {
                 ? (invoiceStatus === 'final' ? `Edit Invoice (#${invoiceNumber})` : `Edit Draft (${invoiceNumber || 'Draft'})`)
                 : 'Create New Invoice'}
             </h1>
-            <p className="text-xs text-[#6B7280]">
-              Tax Invoice for school & office stationery sales
-            </p>
           </div>
         </div>
 

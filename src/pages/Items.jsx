@@ -107,17 +107,12 @@ export function Items() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-[#222222]">
-            Stationery Items
-          </h1>
-          <p className="text-sm text-[#6B7280] mt-0.5">
-            Manage stationery products, HSN codes, UOM, and tax rates
-          </p>
-        </div>
+      <div className="flex items-center justify-between gap-4">
+        <h1 className="text-2xl font-semibold text-[#222222]">
+          Stationery Items
+        </h1>
 
-        <div className="flex items-center justify-end gap-2.5 w-full sm:w-auto">
+        <div className="flex items-center justify-end gap-2.5">
           <Button
             variant="secondary"
             size="iconCompact"

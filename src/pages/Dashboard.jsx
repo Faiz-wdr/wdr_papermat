@@ -100,15 +100,10 @@ export function Dashboard() {
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-[#222222]">
-            Overview Dashboard
-          </h1>
-          <p className="text-sm text-[#6B7280] mt-0.5">
-            Quick sales and billing summary for Wandoor Paper Mart
-          </p>
-        </div>
+      <div className="flex items-center justify-between gap-4">
+        <h1 className="text-2xl font-semibold text-[#222222]">
+          Overview Dashboard
+        </h1>
 
         <div className="hidden sm:flex items-center justify-end sm:w-auto">
           <Button

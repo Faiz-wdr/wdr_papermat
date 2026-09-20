@@ -128,17 +128,12 @@ export function Settings() {
   return (
     <div className="max-w-4xl space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-[#222222]">
-            Business Settings
-          </h1>
-          <p className="text-sm text-[#6B7280] mt-0.5">
-            Configure shop profile, GST registration, and bank details for invoices
-          </p>
-        </div>
+      <div className="flex items-center justify-between gap-4">
+        <h1 className="text-2xl font-semibold text-[#222222]">
+          Business Settings
+        </h1>
 
-        <div className="flex items-center justify-end w-full sm:w-auto">
+        <div className="flex items-center justify-end">
           <Button
             variant="secondary"
             size="iconCompact"

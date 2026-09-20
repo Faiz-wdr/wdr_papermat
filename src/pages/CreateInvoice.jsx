@@ -208,8 +208,8 @@ export function CreateInvoice() {
           message: isAlreadyFinal
             ? `Invoice #${savedInvoice?.invoice_number} updated successfully!`
             : finalize
-            ? `Invoice #${savedInvoice?.invoice_number} finalized successfully!`
-            : `Invoice saved as draft (${savedInvoice?.invoice_number}).`,
+              ? `Invoice #${savedInvoice?.invoice_number} finalized successfully!`
+              : `Invoice saved as draft (${savedInvoice?.invoice_number}).`,
         },
       });
     } catch (err) {
@@ -292,7 +292,7 @@ export function CreateInvoice() {
                 loading={saving}
                 disabled={saving}
               >
-                Finalize Invoice
+                Finalize
               </Button>
             </>
           )}

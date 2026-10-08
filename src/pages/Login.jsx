@@ -57,12 +57,9 @@ export function Login() {
 
         {/* Login Card */}
         <div className="bg-white border border-[#E5E7EB] rounded-xl p-6 sm:p-8 shadow-xs">
-          <h2 className="text-lg font-semibold text-[#222222] mb-1">
+          <h2 className="text-lg font-semibold text-[#222222] mb-6">
             Sign In
           </h2>
-          <p className="text-xs text-[#6B7280] mb-6">
-            Enter your shop credentials to access billing
-          </p>
 
           {error && (
             <Alert variant="error" className="mb-5" onClose={() => setError(null)}>

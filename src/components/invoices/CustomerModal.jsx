@@ -62,7 +62,6 @@ export function CustomerModal({ isOpen, onClose, onCustomerCreated }) {
       isOpen={isOpen}
       onClose={onClose}
       title="Add New Customer"
-      subtitle="Save customer details for quick lookup and invoice generation"
       maxWidth="max-w-md"
     >
       {error && (

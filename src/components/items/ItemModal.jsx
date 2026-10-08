@@ -105,11 +105,6 @@ export function ItemModal({
       isOpen={isOpen}
       onClose={onClose}
       title={isEditing ? 'Edit Stationery Item' : 'Add New Stationery Item'}
-      subtitle={
-        isEditing
-          ? 'Update product details, pricing, and GST rate'
-          : 'Add a new product to your stationery billing catalog'
-      }
       maxWidth="max-w-lg"
     >
       {error && (

@@ -167,9 +167,6 @@ export function Settings() {
                 <h2 className="text-lg font-semibold text-[#222222]">
                   Business Details
                 </h2>
-                <p className="text-xs text-[#6B7280]">
-                  Your shop name, physical location, GST identification, and contact
-                </p>
               </div>
             </div>
 
@@ -223,9 +220,6 @@ export function Settings() {
                 <h2 className="text-lg font-semibold text-[#222222]">
                   Bank Details
                 </h2>
-                <p className="text-xs text-[#6B7280]">
-                  Bank account information printed on tax invoices for customer payments
-                </p>
               </div>
             </div>
 

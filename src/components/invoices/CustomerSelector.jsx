@@ -98,9 +98,6 @@ export function CustomerSelector({
           <h2 className="text-base font-semibold text-[#222222]">
             Details of Receiver (Billed To)
           </h2>
-          <p className="text-xs text-[#6B7280]">
-            Search existing customer or enter billing details
-          </p>
         </div>
 
         {!disabled && (

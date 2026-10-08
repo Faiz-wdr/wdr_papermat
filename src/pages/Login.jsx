@@ -44,8 +44,8 @@ export function Login() {
       <div className="w-full max-w-sm">
         {/* Brand Header */}
         <div className="flex flex-col items-center text-center mb-8">
-          <div className="w-12 h-12 rounded-xl bg-[#358FFF] text-white flex items-center justify-center mb-3 shadow-xs">
-            <Store size={26} aria-hidden="true" />
+          <div className="w-14 h-14 rounded-2xl bg-white border border-[#E5E7EB] flex items-center justify-center mb-3 shadow-xs p-2">
+            <img src="/favicon.svg" alt="Wandoor Paper Mart" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-2xl font-semibold text-[#222222]">
             Wandoor Paper Mart

@@ -25,8 +25,8 @@ export function MobileNav() {
       {/* Mobile Top Header */}
       <header className="md:hidden sticky top-0 z-40 bg-white border-b border-[#E5E7EB] h-14 px-4 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-[#358FFF] text-white flex items-center justify-center">
-            <Store size={16} aria-hidden="true" />
+          <div className="w-8 h-8 rounded-lg bg-white border border-[#E5E7EB] flex items-center justify-center p-1 shrink-0 shadow-2xs">
+            <img src="/favicon.svg" alt="Wandoor Paper Mart" className="w-full h-full object-contain" />
           </div>
           <span className="font-semibold text-sm text-[#222222]">
             Wandoor Paper Mart

@@ -331,7 +331,7 @@ export function InvoiceDetail() {
         {/* 4. Receiver (Billed To) Details Box */}
         <div className="p-4 border-b border-[#222222] bg-white text-xs">
           <div className="font-bold uppercase tracking-wider text-[11px] text-[#222222] mb-1.5 pb-1 border-b border-gray-200">
-            Details Of Receiver (Billed To)
+            Billed To
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-1 gap-x-6">
             <div>
@@ -449,16 +449,16 @@ export function InvoiceDetail() {
               </div>
               <div className="grid grid-cols-3 gap-1 pt-1">
                 <span className="font-semibold text-[#6B7280]">Bank Name:</span>
-                <span className="col-span-2 font-bold">{businessSettings?.bank_name || 'State Bank of India'}</span>
-                
+                <span className="col-span-2 font-bold">{businessSettings?.bank_name || 'Punjab National Bank'}</span>
+
                 <span className="font-semibold text-[#6B7280]">Branch:</span>
                 <span className="col-span-2">{businessSettings?.bank_branch || 'Wandoor Branch'}</span>
-                
+
                 <span className="font-semibold text-[#6B7280]">Acc No:</span>
-                <span className="col-span-2 font-mono font-bold">{businessSettings?.account_number || '384729104928'}</span>
-                
+                <span className="col-span-2 font-mono font-bold">{businessSettings?.account_number || '4363008700003408'}</span>
+
                 <span className="font-semibold text-[#6B7280]">IFSC Code:</span>
-                <span className="col-span-2 font-mono">{businessSettings?.ifsc_code || 'SBIN0070188'}</span>
+                <span className="col-span-2 font-mono">{businessSettings?.ifsc_code || 'PUNB0436300'}</span>
               </div>
             </div>
 

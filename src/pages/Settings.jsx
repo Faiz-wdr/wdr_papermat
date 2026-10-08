@@ -236,7 +236,7 @@ export function Settings() {
                 label="Bank Name"
                 value={formData.bank_name}
                 onChange={handleChange}
-                placeholder="e.g. State Bank of India"
+                placeholder="e.g. Punjab National Bank"
               />
 
               <Input
@@ -254,7 +254,7 @@ export function Settings() {
                 label="Account Number"
                 value={formData.account_number}
                 onChange={handleChange}
-                placeholder="e.g. 384729104928"
+                placeholder="e.g. 4363008700003408"
               />
 
               <Input
@@ -263,7 +263,7 @@ export function Settings() {
                 label="IFSC Code"
                 value={formData.ifsc_code}
                 onChange={handleChange}
-                placeholder="e.g. SBIN0070188"
+                placeholder="e.g. PUNB0436300"
               />
             </div>
           </div>

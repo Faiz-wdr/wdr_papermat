@@ -36,10 +36,10 @@ const sampleSettings = {
   address: 'Main Road, Near Bus Stand, Wandoor, Malappuram, Kerala - 679328',
   mobile: '9847123456',
   gst_no: '32ABCDE1234F1Z5',
-  bank_name: 'State Bank of India',
+  bank_name: 'Punjab National Bank',
   bank_branch: 'Wandoor Branch',
-  account_number: '384729104928',
-  ifsc_code: 'SBIN0070188',
+  account_number: '4363008700003408',
+  ifsc_code: 'PUNB0436300',
 };
 
 const sampleItems = [

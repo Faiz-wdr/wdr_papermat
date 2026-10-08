@@ -525,7 +525,7 @@ export function InvoicePDFDocument({ invoice, items = [], businessSettings = {} 
                 <View style={styles.bankRow}>
                   <Text style={styles.bankLabel}>Bank Name:</Text>
                   <Text style={styles.bankValue}>
-                    {businessSettings?.bank_name || 'State Bank of India'}
+                    {businessSettings?.bank_name || 'Punjab National Bank'}
                   </Text>
                 </View>
                 <View style={styles.bankRow}>
@@ -537,13 +537,13 @@ export function InvoicePDFDocument({ invoice, items = [], businessSettings = {} 
                 <View style={styles.bankRow}>
                   <Text style={styles.bankLabel}>Account No:</Text>
                   <Text style={styles.bankValue}>
-                    {businessSettings?.account_number || '384729104928'}
+                    {businessSettings?.account_number || '4363008700003408'}
                   </Text>
                 </View>
                 <View style={styles.bankRow}>
                   <Text style={styles.bankLabel}>IFSC Code:</Text>
                   <Text style={styles.bankValue}>
-                    {businessSettings?.ifsc_code || 'SBIN0070188'}
+                    {businessSettings?.ifsc_code || 'PUNB0436300'}
                   </Text>
                 </View>
               </View>

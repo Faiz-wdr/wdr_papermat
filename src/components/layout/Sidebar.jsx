@@ -27,8 +27,8 @@ export function Sidebar() {
     >
       {/* Brand Header */}
       <div className="h-16 flex items-center px-6 border-b border-[#E5E7EB] gap-3">
-        <div className="w-8 h-8 rounded-lg bg-[#358FFF] text-white flex items-center justify-center shrink-0">
-          <Store size={18} aria-hidden="true" />
+        <div className="w-8 h-8 rounded-lg bg-white border border-[#E5E7EB] flex items-center justify-center p-1 shrink-0 shadow-2xs">
+          <img src="/favicon.svg" alt="Wandoor Paper Mart" className="w-full h-full object-contain" />
         </div>
         <div className="flex flex-col min-w-0">
           <span className="font-semibold text-sm text-[#222222] truncate">

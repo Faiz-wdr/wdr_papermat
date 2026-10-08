@@ -50,9 +50,15 @@ export function CreateInvoice() {
           const { data, error: rpcErr } = await supabase.rpc('preview_next_invoice_number');
           if (!rpcErr && data) {
             setNextInvoicePreview(data);
+            setInvoiceNumber(data);
+          } else {
+            setNextInvoicePreview('042');
+            setInvoiceNumber('042');
           }
         } catch (err) {
           console.error('Failed to preview next invoice number:', err);
+          setNextInvoicePreview('042');
+          setInvoiceNumber('042');
         }
       };
       fetchNextInvoiceNumber();
@@ -160,6 +166,7 @@ export function CreateInvoice() {
 
       const invoicePayload = {
         id: isEditing ? id : undefined,
+        invoice_number: invoiceNumber ? invoiceNumber.trim() : undefined,
         invoice_date: invoiceDate,
         customer_id: customerData.customer_id,
         customer_name: customerData.customer_name.trim(),
@@ -318,15 +325,16 @@ export function CreateInvoice() {
 
       {/* Invoice Meta Bar: Number & Date */}
       <div className="bg-white border border-[#E5E7EB] rounded-xl p-5 shadow-xs grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="text-xs font-semibold text-[#222222] tracking-wide block mb-1.5">
-            Invoice Number
-          </label>
-          <div className="h-10 px-3 flex items-center bg-gray-50 border border-[#E5E7EB] rounded-lg text-sm font-semibold text-[#222222]">
-            <Hash size={16} className="text-[#6B7280] mr-2" aria-hidden="true" />
-            <span>{invoiceNumber || nextInvoicePreview || '0702'}</span>
-          </div>
-        </div>
+        <Input
+          id="invoice-number"
+          name="invoice_number"
+          label="Invoice Number"
+          value={invoiceNumber}
+          onChange={(e) => setInvoiceNumber(e.target.value)}
+          placeholder="e.g. 042"
+          icon={Hash}
+
+        />
 
         <Input
           id="invoice-date"
@@ -353,7 +361,6 @@ export function CreateInvoice() {
               Invoice Line Items
             </h2>
             <p className="text-xs text-[#6B7280]">
-              Add stationery items, adjust quantities, or provide special unit rates
             </p>
           </div>
         </div>

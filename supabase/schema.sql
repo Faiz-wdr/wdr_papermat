@@ -178,10 +178,10 @@ SELECT
   'Main Road, Near Bus Stand, Wandoor, Malappuram, Kerala - 679328',
   '32ABCDE1234F1Z5',
   '+91 98765 43210',
-  'State Bank of India',
+  'Punjab National Bank',
   'Wandoor Branch',
-  '384729104928',
-  'SBIN0070188'
+  '4363008700003408',
+  'PUNB0436300'
 WHERE NOT EXISTS (SELECT 1 FROM public.business_settings);
 
 -- Seed initial stationery items

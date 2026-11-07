@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Trash2 } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
@@ -30,6 +31,7 @@ export function ItemModal({
   isOpen,
   onClose,
   onSave,
+  onDelete,
   item = null,
 }) {
   const isEditing = Boolean(item && item.id);
@@ -197,22 +199,41 @@ export function ItemModal({
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#E5E7EB] mt-6">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={onClose}
-            disabled={saving}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            loading={saving}
-          >
-            {isEditing ? 'Save Changes' : 'Add Item'}
-          </Button>
+        <div className="flex items-center justify-between pt-4 border-t border-[#E5E7EB] mt-6">
+          <div>
+            {isEditing && onDelete && (
+              <Button
+                type="button"
+                variant="danger"
+                size="compact"
+                icon={Trash2}
+                onClick={() => {
+                  onClose();
+                  onDelete(item);
+                }}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+              >
+                Delete
+              </Button>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={onClose}
+              disabled={saving}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              loading={saving}
+            >
+              {isEditing ? 'Save Changes' : 'Add Item'}
+            </Button>
+          </div>
         </div>
       </form>
     </Modal>

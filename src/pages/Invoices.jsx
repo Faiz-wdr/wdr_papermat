@@ -27,7 +27,8 @@ export function Invoices() {
   const [activePressId, setActivePressId] = useState(null);
 
   const longPressTimer = useRef(null);
-  const isLongPressTriggered = useRef(false);
+  const longPressTriggeredAt = useRef(0);
+  const longPressId = useRef(null);
   const touchStartPos = useRef({ x: 0, y: 0 });
 
   const toggleSelect = (id) => {
@@ -45,12 +46,15 @@ export function Invoices() {
   };
 
   const startPressTimer = (inv) => {
-    isLongPressTriggered.current = false;
+    // If already in selection mode, no need to wait for a timer
+    if (selectedIds.length > 0) return;
+
     setActivePressId(inv.id);
     if (longPressTimer.current) clearTimeout(longPressTimer.current);
 
     longPressTimer.current = setTimeout(() => {
-      isLongPressTriggered.current = true;
+      longPressTriggeredAt.current = Date.now();
+      longPressId.current = inv.id;
       setActivePressId(null);
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
         try {
@@ -59,9 +63,9 @@ export function Invoices() {
           // ignore vibration errors
         }
       }
-      // Row is selected upon long-press; popup only opens via header delete button
+      // Row is selected upon long-press; unlocks multi-selection by on-click
       toggleSelect(inv.id);
-    }, 550);
+    }, 500);
   };
 
   const cancelPressTimer = () => {
@@ -73,6 +77,8 @@ export function Invoices() {
   };
 
   const handleTouchStart = (inv, e) => {
+    // In selection mode, taps directly toggle selection via onClick
+    if (selectedIds.length > 0) return;
     const touch = e.touches[0];
     touchStartPos.current = { x: touch.clientX, y: touch.clientY };
     startPressTimer(inv);
@@ -83,7 +89,7 @@ export function Invoices() {
     const touch = e.touches[0];
     const dx = Math.abs(touch.clientX - touchStartPos.current.x);
     const dy = Math.abs(touch.clientY - touchStartPos.current.y);
-    if (dx > 10 || dy > 10) {
+    if (dx > 25 || dy > 25) {
       cancelPressTimer();
     }
   };
@@ -93,6 +99,8 @@ export function Invoices() {
   };
 
   const handleMouseDown = (inv, e) => {
+    // In selection mode, clicks directly toggle selection via onClick
+    if (selectedIds.length > 0) return;
     if (e.button === 0) {
       startPressTimer(inv);
     }
@@ -109,20 +117,25 @@ export function Invoices() {
   const handleContextMenu = (inv, e) => {
     e.preventDefault();
     cancelPressTimer();
-    isLongPressTriggered.current = true;
+    longPressTriggeredAt.current = Date.now();
+    longPressId.current = inv.id;
     toggleSelect(inv.id);
   };
 
   const handleRowClick = (inv) => {
-    if (isLongPressTriggered.current) {
-      isLongPressTriggered.current = false;
+    // If click was fired right after the long-press trigger on this exact row, ignore it
+    const timeSinceLongPress = Date.now() - longPressTriggeredAt.current;
+    if (timeSinceLongPress < 450 && longPressId.current === inv.id) {
+      longPressId.current = null;
       return;
     }
-    // If in multi-select mode, clicking row toggles its selection
+
+    // Once in selection mode, any other row (or any row) is selected/deselected by on-click!
     if (selectedIds.length > 0) {
       toggleSelect(inv.id);
       return;
     }
+
     navigate(`/invoices/${inv.id}`);
   };
 
@@ -335,6 +348,7 @@ export function Invoices() {
                   const isDraft = inv.status === 'draft';
                   const isSelected = selectedIds.includes(inv.id);
                   const isBeingPressed = activePressId === inv.id;
+                  const isSelectionMode = selectedIds.length > 0;
 
                   return (
                     <tr
@@ -347,17 +361,20 @@ export function Invoices() {
                       onMouseUp={handleMouseUp}
                       onMouseLeave={handleMouseLeave}
                       onContextMenu={(e) => handleContextMenu(inv, e)}
+                      style={{ WebkitTouchCallout: 'none' }}
                       className={`transition-colors cursor-pointer select-none ${
                         isBeingPressed
                           ? 'bg-red-100/70 ring-1 ring-inset ring-red-300'
                           : isSelected
-                          ? 'bg-red-50/70 ring-1 ring-inset ring-red-200'
+                          ? 'bg-red-50/80 ring-1 ring-inset ring-red-200'
+                          : isSelectionMode
+                          ? 'hover:bg-red-50/30'
                           : 'hover:bg-gray-50/75'
                       }`}
                     >
                       <td className="px-6 py-4 font-semibold text-[#222222]">
                         <div className="flex items-center gap-3">
-                          {selectedIds.length > 0 && (
+                          {isSelectionMode && (
                             <input
                               type="checkbox"
                               checked={isSelected}
@@ -389,28 +406,49 @@ export function Invoices() {
                           {isDraft ? 'Draft' : 'Final'}
                         </Badge>
                       </td>
-                      <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-end gap-1.5">
-                          <Button
-                            variant="secondary"
-                            size="iconCompact"
-                            icon={Eye}
-                            title="View Invoice"
-                            aria-label={`View invoice ${inv.invoice_number}`}
-                            onClick={() => navigate(`/invoices/${inv.id}`)}
-                          />
-
-                          {isDraft && (
+                      <td
+                        className="px-6 py-4 text-right"
+                        onClick={(e) => {
+                          if (isSelectionMode) {
+                            // In selection mode, clicking action cell also toggles row selection
+                            return;
+                          }
+                          e.stopPropagation();
+                        }}
+                      >
+                        {isSelectionMode ? (
+                          <div className="flex items-center justify-end">
+                            <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium transition-colors ${
+                              isSelected
+                                ? 'bg-red-100 text-red-700 font-semibold'
+                                : 'bg-gray-100 text-gray-500'
+                            }`}>
+                              {isSelected ? 'Selected' : 'Select'}
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-end gap-1.5">
                             <Button
                               variant="secondary"
                               size="iconCompact"
-                              icon={Edit2}
-                              title="Edit Draft"
-                              aria-label={`Edit draft ${inv.invoice_number}`}
-                              onClick={() => navigate(`/invoices/${inv.id}/edit`)}
+                              icon={Eye}
+                              title="View Invoice"
+                              aria-label={`View invoice ${inv.invoice_number}`}
+                              onClick={() => navigate(`/invoices/${inv.id}`)}
                             />
-                          )}
-                        </div>
+
+                            {isDraft && (
+                              <Button
+                                variant="secondary"
+                                size="iconCompact"
+                                icon={Edit2}
+                                title="Edit Draft"
+                                aria-label={`Edit draft ${inv.invoice_number}`}
+                                onClick={() => navigate(`/invoices/${inv.id}/edit`)}
+                              />
+                            )}
+                          </div>
+                        )}
                       </td>
                     </tr>
                   );

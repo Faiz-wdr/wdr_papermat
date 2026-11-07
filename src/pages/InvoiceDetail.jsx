@@ -11,6 +11,7 @@ import {
   Hash,
   Landmark,
   AlertTriangle,
+  Trash2,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { formatCurrency, formatDate, formatGSTRate } from '../utils/formatters';
@@ -20,6 +21,7 @@ import { useToast } from '../context/ToastContext';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { Alert } from '../components/ui/Alert';
+import { Modal } from '../components/ui/Modal';
 
 export function InvoiceDetail() {
   const { id } = useParams();
@@ -33,6 +35,8 @@ export function InvoiceDetail() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -142,6 +146,36 @@ export function InvoiceDetail() {
     window.print();
   };
 
+  const handleDeleteInvoice = async () => {
+    try {
+      setDeleting(true);
+      if (!supabase) throw new Error('Supabase client is not connected.');
+
+      // 1. Delete associated invoice items
+      const { error: itemsError } = await supabase
+        .from('invoice_items')
+        .delete()
+        .eq('invoice_id', id);
+
+      if (itemsError) throw itemsError;
+
+      // 2. Delete the invoice
+      const { error: invError } = await supabase
+        .from('invoices')
+        .delete()
+        .eq('id', id);
+
+      if (invError) throw invError;
+
+      toast.success(`Invoice #${invoice.invoice_number} deleted successfully.`);
+      navigate('/invoices');
+    } catch (err) {
+      console.error('Failed to delete invoice:', err);
+      toast.error(err.message || 'Failed to delete invoice. Please try again.');
+      setDeleting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="py-20 text-center text-[#6B7280]">
@@ -202,6 +236,16 @@ export function InvoiceDetail() {
               <Button
                 variant="secondary"
                 size="icon"
+                icon={Trash2}
+                onClick={() => setIsDeleteModalOpen(true)}
+                title="Delete Draft"
+                aria-label="Delete Draft"
+                className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+              />
+
+              <Button
+                variant="secondary"
+                size="icon"
                 icon={Edit2}
                 onClick={() => navigate(`/invoices/${id}/edit`)}
                 title="Edit Draft"
@@ -230,6 +274,16 @@ export function InvoiceDetail() {
             </>
           ) : (
             <>
+              <Button
+                variant="secondary"
+                size="icon"
+                icon={Trash2}
+                onClick={() => setIsDeleteModalOpen(true)}
+                title="Delete Invoice"
+                aria-label="Delete Invoice"
+                className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+              />
+
               <Button
                 variant="secondary"
                 size="icon"
@@ -501,6 +555,66 @@ export function InvoiceDetail() {
           </div>
         </div>
       </div>
+
+      {/* Delete Invoice Confirmation Modal */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => !deleting && setIsDeleteModalOpen(false)}
+        title="Delete Invoice"
+        subtitle="This action cannot be undone."
+      >
+        {invoice && (
+          <div className="space-y-4">
+            <div className="p-4 bg-red-50/60 border border-red-100 rounded-xl space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold uppercase tracking-wider text-red-700">
+                  Invoice #{invoice.invoice_number}
+                </span>
+                <Badge variant={isDraft ? 'draft' : 'paid'}>
+                  {isDraft ? 'Draft' : 'Final'}
+                </Badge>
+              </div>
+
+              <div className="text-sm font-semibold text-[#222222]">
+                {invoice.customer_name}
+              </div>
+
+              <div className="flex items-center justify-between text-xs text-[#6B7280] pt-1 border-t border-red-100/70">
+                <span>Date: {formatDate(invoice.invoice_date)}</span>
+                <span className="font-bold text-[#222222]">
+                  {formatCurrency(invoice.grand_total)}
+                </span>
+              </div>
+            </div>
+
+            <p className="text-sm text-[#4B5563]">
+              Are you sure you want to permanently delete this invoice and all of its line items?
+            </p>
+
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#E5E7EB]">
+              <Button
+                variant="secondary"
+                size="normal"
+                onClick={() => setIsDeleteModalOpen(false)}
+                disabled={deleting}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                size="normal"
+                icon={Trash2}
+                loading={deleting}
+                disabled={deleting}
+                onClick={handleDeleteInvoice}
+                className="bg-red-600 hover:bg-red-700 text-white border-transparent"
+              >
+                Delete Invoice
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

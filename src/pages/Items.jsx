@@ -22,15 +22,29 @@ export function Items() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
 
-  // Delete State & Long-press management
-  const [itemToDelete, setItemToDelete] = useState(null);
+  // Delete State & Selection (Long-press management)
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [enabledDeleteIds, setEnabledDeleteIds] = useState([]);
   const [activePressId, setActivePressId] = useState(null);
 
   const longPressTimer = useRef(null);
   const isLongPressTriggered = useRef(false);
   const touchStartPos = useRef({ x: 0, y: 0 });
+
+  const toggleSelect = (id) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleToggleSelectAll = () => {
+    if (selectedIds.length === filteredItems.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredItems.map((item) => item.id));
+    }
+  };
 
   const startPressTimer = (item) => {
     isLongPressTriggered.current = false;
@@ -47,8 +61,8 @@ export function Items() {
           // ignore
         }
       }
-      setEnabledDeleteIds((prev) => (prev.includes(item.id) ? prev : [...prev, item.id]));
-      setItemToDelete(item);
+      // Row is selected upon long-press; popup only opens via header delete button
+      toggleSelect(item.id);
     }, 550);
   };
 
@@ -98,8 +112,7 @@ export function Items() {
     e.preventDefault();
     cancelPressTimer();
     isLongPressTriggered.current = true;
-    setEnabledDeleteIds((prev) => (prev.includes(item.id) ? prev : [...prev, item.id]));
-    setItemToDelete(item);
+    toggleSelect(item.id);
   };
 
   const handleRowClick = (item) => {
@@ -107,11 +120,16 @@ export function Items() {
       isLongPressTriggered.current = false;
       return;
     }
+    // If in multi-select mode, clicking row toggles its selection
+    if (selectedIds.length > 0) {
+      toggleSelect(item.id);
+      return;
+    }
     handleOpenEditModal(item);
   };
 
   const handleConfirmDelete = async () => {
-    if (!itemToDelete) return;
+    if (selectedIds.length === 0) return;
 
     try {
       setDeleting(true);
@@ -120,17 +138,22 @@ export function Items() {
       const { error: delError } = await supabase
         .from('items')
         .delete()
-        .eq('id', itemToDelete.id);
+        .in('id', selectedIds);
 
       if (delError) throw delError;
 
-      setItems((prev) => prev.filter((it) => it.id !== itemToDelete.id));
-      setEnabledDeleteIds((prev) => prev.filter((id) => id !== itemToDelete.id));
-      toast.success(`Item "${itemToDelete.name}" deleted successfully.`);
-      setItemToDelete(null);
+      const count = selectedIds.length;
+      setItems((prev) => prev.filter((it) => !selectedIds.includes(it.id)));
+      setSelectedIds([]);
+      setIsDeleteModalOpen(false);
+      toast.success(
+        count > 1
+          ? `${count} items deleted successfully.`
+          : 'Item deleted successfully.'
+      );
     } catch (err) {
-      console.error('Failed to delete item:', err);
-      toast.error(err.message || 'Failed to delete item. Please try again.');
+      console.error('Failed to delete items:', err);
+      toast.error(err.message || 'Failed to delete items. Please try again.');
     } finally {
       setDeleting(false);
     }
@@ -294,18 +317,58 @@ export function Items() {
             <table className="w-full text-left text-sm" aria-label="Stationery items list">
               <thead>
                 <tr className="border-b border-[#E5E7EB] bg-gray-50/50 text-[#6B7280] text-xs font-semibold uppercase tracking-wider">
-                  <th scope="col" className="px-6 py-3">Item Name</th>
+                  <th scope="col" className="px-6 py-3">
+                    <div className="flex items-center gap-3">
+                      {selectedIds.length > 0 && (
+                        <input
+                          type="checkbox"
+                          checked={filteredItems.length > 0 && selectedIds.length === filteredItems.length}
+                          onChange={handleToggleSelectAll}
+                          className="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500 cursor-pointer shrink-0"
+                          title={selectedIds.length === filteredItems.length ? "Deselect all" : "Select all"}
+                          aria-label="Select all items"
+                        />
+                      )}
+                      <span>Item Name</span>
+                    </div>
+                  </th>
                   <th scope="col" className="px-6 py-3">HSN Code</th>
                   <th scope="col" className="px-6 py-3">UOM</th>
                   <th scope="col" className="px-6 py-3">GST Rate</th>
                   <th scope="col" className="px-6 py-3 text-right">Unit Rate</th>
                   <th scope="col" className="px-6 py-3 text-center">Status</th>
-                  <th scope="col" className="px-6 py-3 text-right">Action</th>
+                  <th scope="col" className="px-6 py-3 text-right">
+                    {selectedIds.length > 0 ? (
+                      <div className="flex items-center justify-end gap-1.5 normal-case tracking-normal">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="compact"
+                          onClick={() => setSelectedIds([])}
+                          className="text-xs font-medium"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="danger"
+                          size="compact"
+                          icon={Trash2}
+                          onClick={() => setIsDeleteModalOpen(true)}
+                          className="bg-red-600 hover:bg-red-700 text-white border-transparent text-xs font-semibold whitespace-nowrap"
+                        >
+                          {selectedIds.length > 1 ? `Delete All (${selectedIds.length})` : 'Delete (1)'}
+                        </Button>
+                      </div>
+                    ) : (
+                      'Action'
+                    )}
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E5E7EB]">
                 {filteredItems.map((item) => {
-                  const isDeleteEnabled = enabledDeleteIds.includes(item.id);
+                  const isSelected = selectedIds.includes(item.id);
                   const isBeingPressed = activePressId === item.id;
 
                   return (
@@ -321,14 +384,28 @@ export function Items() {
                       onContextMenu={(e) => handleContextMenu(item, e)}
                       className={`transition-colors cursor-pointer select-none ${
                         isBeingPressed
-                          ? 'bg-red-50/80 ring-1 ring-inset ring-red-300'
-                          : isDeleteEnabled
-                          ? 'bg-red-50/25 hover:bg-red-50/50'
+                          ? 'bg-red-100/70 ring-1 ring-inset ring-red-300'
+                          : isSelected
+                          ? 'bg-red-50/70 ring-1 ring-inset ring-red-200'
                           : 'hover:bg-gray-50/50'
                       }`}
                     >
                       <td className="px-6 py-4 font-semibold text-[#222222]">
-                        {item.name}
+                        <div className="flex items-center gap-3">
+                          {selectedIds.length > 0 && (
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                toggleSelect(item.id);
+                              }}
+                              className="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500 cursor-pointer shrink-0"
+                              aria-label={`Select item ${item.name}`}
+                            />
+                          )}
+                          <span>{item.name}</span>
+                        </div>
                       </td>
                       <td className="px-6 py-4 text-[#6B7280] font-mono text-xs">
                         {item.hsn_code || '-'}
@@ -360,18 +437,6 @@ export function Items() {
                           >
                             Edit
                           </Button>
-
-                          {isDeleteEnabled && (
-                            <Button
-                              variant="danger"
-                              size="iconCompact"
-                              icon={Trash2}
-                              title="Delete Item"
-                              aria-label={`Delete item ${item.name}`}
-                              onClick={() => setItemToDelete(item)}
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
-                            />
-                          )}
                         </div>
                       </td>
                     </tr>
@@ -379,81 +444,93 @@ export function Items() {
                 })}
               </tbody>
             </table>
-
-            <div className="px-6 py-2.5 bg-gray-50/50 border-t border-[#E5E7EB] text-xs text-[#6B7280] flex items-center justify-between">
-              <span>Tip: Press and hold any row to delete the item.</span>
-              {enabledDeleteIds.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setEnabledDeleteIds([])}
-                  className="text-xs text-[#358FFF] hover:underline font-medium cursor-pointer"
-                >
-                  Done
-                </button>
-              )}
-            </div>
           </div>
         )}
       </div>
 
       {/* Delete Item Confirmation Modal */}
       <Modal
-        isOpen={Boolean(itemToDelete)}
-        onClose={() => !deleting && setItemToDelete(null)}
-        title="Delete Item"
+        isOpen={isDeleteModalOpen && selectedIds.length > 0}
+        onClose={() => !deleting && setIsDeleteModalOpen(false)}
+        title={selectedIds.length > 1 ? `Delete ${selectedIds.length} Items` : 'Delete Item'}
         subtitle="This action cannot be undone."
       >
-        {itemToDelete && (
-          <div className="space-y-4">
-            <div className="p-4 bg-red-50/60 border border-red-100 rounded-xl space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold uppercase tracking-wider text-red-700">
-                  {itemToDelete.hsn_code ? `HSN: ${itemToDelete.hsn_code}` : 'Item'}
-                </span>
-                <Badge variant={itemToDelete.is_active ? 'active' : 'inactive'}>
-                  {itemToDelete.is_active ? 'Active' : 'Inactive'}
-                </Badge>
-              </div>
+        {selectedIds.length > 0 && (() => {
+          const selectedItemsList = items.filter((it) => selectedIds.includes(it.id));
+          const singleItem = selectedItemsList[0];
+          const isMultiple = selectedIds.length > 1;
 
-              <div className="text-sm font-semibold text-[#222222]">
-                {itemToDelete.name}
-              </div>
+          return (
+            <div className="space-y-4">
+              {isMultiple ? (
+                <div className="p-4 bg-red-50/60 border border-red-100 rounded-xl space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-red-700">
+                      {selectedIds.length} Items Selected
+                    </span>
+                  </div>
+                  <div className="text-xs text-[#4B5563] max-h-24 overflow-y-auto pt-1 border-t border-red-100/70 flex flex-wrap gap-1">
+                    {selectedItemsList.map((it) => (
+                      <span key={it.id} className="px-2 py-0.5 bg-white border border-red-200 rounded text-[11px] text-red-800 font-medium">
+                        {it.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : singleItem ? (
+                <div className="p-4 bg-red-50/60 border border-red-100 rounded-xl space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-red-700">
+                      {singleItem.hsn_code ? `HSN: ${singleItem.hsn_code}` : 'Item'}
+                    </span>
+                    <Badge variant={singleItem.is_active ? 'active' : 'inactive'}>
+                      {singleItem.is_active ? 'Active' : 'Inactive'}
+                    </Badge>
+                  </div>
 
-              <div className="flex items-center justify-between text-xs text-[#6B7280] pt-1 border-t border-red-100/70">
-                <span>Unit: {itemToDelete.uom} | GST: {formatGSTRate(itemToDelete.gst_rate)}</span>
-                <span className="font-bold text-[#222222]">
-                  {formatCurrency(itemToDelete.unit_rate)}
-                </span>
+                  <div className="text-sm font-semibold text-[#222222]">
+                    {singleItem.name}
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-[#6B7280] pt-1 border-t border-red-100/70">
+                    <span>Unit: {singleItem.uom} | GST: {formatGSTRate(singleItem.gst_rate)}</span>
+                    <span className="font-bold text-[#222222]">
+                      {formatCurrency(singleItem.unit_rate)}
+                    </span>
+                  </div>
+                </div>
+              ) : null}
+
+              <p className="text-sm text-[#4B5563]">
+                {isMultiple
+                  ? `Are you sure you want to permanently delete these ${selectedIds.length} stationery items? Existing invoices containing these items will keep their saved record.`
+                  : 'Are you sure you want to permanently delete this stationery item? Existing invoices containing this item will keep their saved record.'}
+              </p>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#E5E7EB]">
+                <Button
+                  variant="secondary"
+                  size="normal"
+                  onClick={() => setIsDeleteModalOpen(false)}
+                  disabled={deleting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="danger"
+                  size="normal"
+                  icon={Trash2}
+                  loading={deleting}
+                  disabled={deleting}
+                  onClick={handleConfirmDelete}
+                  className="bg-red-600 hover:bg-red-700 text-white border-transparent"
+                >
+                  {isMultiple ? `Delete All (${selectedIds.length})` : 'Delete Item'}
+                </Button>
               </div>
             </div>
-
-            <p className="text-sm text-[#4B5563]">
-              Are you sure you want to permanently delete this stationery item? Existing invoices containing this item will keep their saved record.
-            </p>
-
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#E5E7EB]">
-              <Button
-                variant="secondary"
-                size="normal"
-                onClick={() => setItemToDelete(null)}
-                disabled={deleting}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="danger"
-                size="normal"
-                icon={Trash2}
-                loading={deleting}
-                disabled={deleting}
-                onClick={handleConfirmDelete}
-                className="bg-red-600 hover:bg-red-700 text-white border-transparent"
-              >
-                Delete Item
-              </Button>
-            </div>
-          </div>
-        )}
+          );
+        })()}
       </Modal>
 
       {/* Add / Edit Modal */}
@@ -461,7 +538,10 @@ export function Items() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveItem}
-        onDelete={(item) => setItemToDelete(item)}
+        onDelete={(item) => {
+          setSelectedIds([item.id]);
+          setIsDeleteModalOpen(true);
+        }}
         item={editingItem}
       />
     </div>

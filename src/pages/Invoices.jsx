@@ -20,15 +20,29 @@ export function Invoices() {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Delete State & Long-press management
-  const [invoiceToDelete, setInvoiceToDelete] = useState(null);
+  // Delete State & Selection (Long-press management)
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [enabledDeleteIds, setEnabledDeleteIds] = useState([]);
   const [activePressId, setActivePressId] = useState(null);
 
   const longPressTimer = useRef(null);
   const isLongPressTriggered = useRef(false);
   const touchStartPos = useRef({ x: 0, y: 0 });
+
+  const toggleSelect = (id) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleToggleSelectAll = () => {
+    if (selectedIds.length === filteredInvoices.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredInvoices.map((inv) => inv.id));
+    }
+  };
 
   const startPressTimer = (inv) => {
     isLongPressTriggered.current = false;
@@ -45,8 +59,8 @@ export function Invoices() {
           // ignore vibration errors
         }
       }
-      setEnabledDeleteIds((prev) => (prev.includes(inv.id) ? prev : [...prev, inv.id]));
-      setInvoiceToDelete(inv);
+      // Row is selected upon long-press; popup only opens via header delete button
+      toggleSelect(inv.id);
     }, 550);
   };
 
@@ -96,8 +110,7 @@ export function Invoices() {
     e.preventDefault();
     cancelPressTimer();
     isLongPressTriggered.current = true;
-    setEnabledDeleteIds((prev) => (prev.includes(inv.id) ? prev : [...prev, inv.id]));
-    setInvoiceToDelete(inv);
+    toggleSelect(inv.id);
   };
 
   const handleRowClick = (inv) => {
@@ -105,40 +118,50 @@ export function Invoices() {
       isLongPressTriggered.current = false;
       return;
     }
+    // If in multi-select mode, clicking row toggles its selection
+    if (selectedIds.length > 0) {
+      toggleSelect(inv.id);
+      return;
+    }
     navigate(`/invoices/${inv.id}`);
   };
 
   const handleConfirmDelete = async () => {
-    if (!invoiceToDelete) return;
+    if (selectedIds.length === 0) return;
 
     try {
       setDeleting(true);
       if (!supabase) throw new Error('Supabase client is not connected.');
 
-      // 1. Delete associated invoice items
+      // 1. Delete associated invoice items for all selected invoices
       const { error: itemsError } = await supabase
         .from('invoice_items')
         .delete()
-        .eq('invoice_id', invoiceToDelete.id);
+        .in('invoice_id', selectedIds);
 
       if (itemsError) throw itemsError;
 
-      // 2. Delete the invoice record
+      // 2. Delete the invoice records
       const { error: invError } = await supabase
         .from('invoices')
         .delete()
-        .eq('id', invoiceToDelete.id);
+        .in('id', selectedIds);
 
       if (invError) throw invError;
 
+      const count = selectedIds.length;
       // 3. Update state
-      setInvoices((prev) => prev.filter((it) => it.id !== invoiceToDelete.id));
-      setEnabledDeleteIds((prev) => prev.filter((id) => id !== invoiceToDelete.id));
-      toast.success(`Invoice #${invoiceToDelete.invoice_number} deleted successfully.`);
-      setInvoiceToDelete(null);
+      setInvoices((prev) => prev.filter((it) => !selectedIds.includes(it.id)));
+      setSelectedIds([]);
+      setIsDeleteModalOpen(false);
+      toast.success(
+        count > 1
+          ? `${count} invoices deleted successfully.`
+          : 'Invoice deleted successfully.'
+      );
     } catch (err) {
-      console.error('Failed to delete invoice:', err);
-      toast.error(err.message || 'Failed to delete invoice. Please try again.');
+      console.error('Failed to delete invoices:', err);
+      toast.error(err.message || 'Failed to delete. Please try again.');
     } finally {
       setDeleting(false);
     }
@@ -259,18 +282,58 @@ export function Invoices() {
             <table className="w-full text-left text-sm" aria-label="Invoices list">
               <thead>
                 <tr className="border-b border-[#E5E7EB] bg-gray-50/50 text-[#6B7280] text-xs font-semibold uppercase tracking-wider">
-                  <th scope="col" className="px-6 py-3">Invoice Number</th>
+                  <th scope="col" className="px-6 py-3">
+                    <div className="flex items-center gap-3">
+                      {selectedIds.length > 0 && (
+                        <input
+                          type="checkbox"
+                          checked={filteredInvoices.length > 0 && selectedIds.length === filteredInvoices.length}
+                          onChange={handleToggleSelectAll}
+                          className="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500 cursor-pointer shrink-0"
+                          title={selectedIds.length === filteredInvoices.length ? "Deselect all" : "Select all"}
+                          aria-label="Select all invoices"
+                        />
+                      )}
+                      <span>Invoice Number</span>
+                    </div>
+                  </th>
                   <th scope="col" className="px-6 py-3">Customer</th>
                   <th scope="col" className="px-6 py-3">Date</th>
                   <th scope="col" className="px-6 py-3 text-right">Amount</th>
                   <th scope="col" className="px-6 py-3 text-center">Status</th>
-                  <th scope="col" className="px-6 py-3 text-right">Actions</th>
+                  <th scope="col" className="px-6 py-3 text-right">
+                    {selectedIds.length > 0 ? (
+                      <div className="flex items-center justify-end gap-1.5 normal-case tracking-normal">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="compact"
+                          onClick={() => setSelectedIds([])}
+                          className="text-xs font-medium"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="danger"
+                          size="compact"
+                          icon={Trash2}
+                          onClick={() => setIsDeleteModalOpen(true)}
+                          className="bg-red-600 hover:bg-red-700 text-white border-transparent text-xs font-semibold whitespace-nowrap"
+                        >
+                          {selectedIds.length > 1 ? `Delete All (${selectedIds.length})` : 'Delete (1)'}
+                        </Button>
+                      </div>
+                    ) : (
+                      'Actions'
+                    )}
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E5E7EB]">
                 {filteredInvoices.map((inv) => {
                   const isDraft = inv.status === 'draft';
-                  const isDeleteEnabled = enabledDeleteIds.includes(inv.id);
+                  const isSelected = selectedIds.includes(inv.id);
                   const isBeingPressed = activePressId === inv.id;
 
                   return (
@@ -286,14 +349,28 @@ export function Invoices() {
                       onContextMenu={(e) => handleContextMenu(inv, e)}
                       className={`transition-colors cursor-pointer select-none ${
                         isBeingPressed
-                          ? 'bg-red-50/80 ring-1 ring-inset ring-red-300'
-                          : isDeleteEnabled
-                          ? 'bg-red-50/25 hover:bg-red-50/50'
+                          ? 'bg-red-100/70 ring-1 ring-inset ring-red-300'
+                          : isSelected
+                          ? 'bg-red-50/70 ring-1 ring-inset ring-red-200'
                           : 'hover:bg-gray-50/75'
                       }`}
                     >
                       <td className="px-6 py-4 font-semibold text-[#222222]">
-                        {inv.invoice_number}
+                        <div className="flex items-center gap-3">
+                          {selectedIds.length > 0 && (
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                toggleSelect(inv.id);
+                              }}
+                              className="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500 cursor-pointer shrink-0"
+                              aria-label={`Select invoice ${inv.invoice_number}`}
+                            />
+                          )}
+                          <span>{inv.invoice_number}</span>
+                        </div>
                       </td>
                       <td className="px-6 py-4 text-[#222222]">
                         <div className="font-medium">{inv.customer_name}</div>
@@ -333,18 +410,6 @@ export function Invoices() {
                               onClick={() => navigate(`/invoices/${inv.id}/edit`)}
                             />
                           )}
-
-                          {isDeleteEnabled && (
-                            <Button
-                              variant="danger"
-                              size="iconCompact"
-                              icon={Trash2}
-                              title="Delete Invoice"
-                              aria-label={`Delete invoice ${inv.invoice_number}`}
-                              onClick={() => setInvoiceToDelete(inv)}
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
-                            />
-                          )}
                         </div>
                       </td>
                     </tr>
@@ -352,81 +417,96 @@ export function Invoices() {
                 })}
               </tbody>
             </table>
-
-            <div className="px-6 py-2.5 bg-gray-50/50 border-t border-[#E5E7EB] text-xs text-[#6B7280] flex items-center justify-between">
-              <span>Tip: Press and hold any row to delete the invoice.</span>
-              {enabledDeleteIds.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setEnabledDeleteIds([])}
-                  className="text-xs text-[#358FFF] hover:underline font-medium cursor-pointer"
-                >
-                  Done
-                </button>
-              )}
-            </div>
           </div>
         )}
       </div>
 
-      {/* Delete Invoice Confirmation Modal */}
+      {/* Delete Invoices Confirmation Modal */}
       <Modal
-        isOpen={Boolean(invoiceToDelete)}
-        onClose={() => !deleting && setInvoiceToDelete(null)}
-        title="Delete Invoice"
+        isOpen={isDeleteModalOpen && selectedIds.length > 0}
+        onClose={() => !deleting && setIsDeleteModalOpen(false)}
+        title={selectedIds.length > 1 ? `Delete ${selectedIds.length} Invoices` : 'Delete Invoice'}
         subtitle="This action cannot be undone."
       >
-        {invoiceToDelete && (
-          <div className="space-y-4">
-            <div className="p-4 bg-red-50/60 border border-red-100 rounded-xl space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold uppercase tracking-wider text-red-700">
-                  Invoice #{invoiceToDelete.invoice_number}
-                </span>
-                <Badge variant={invoiceToDelete.status === 'draft' ? 'draft' : 'paid'}>
-                  {invoiceToDelete.status === 'draft' ? 'Draft' : 'Final'}
-                </Badge>
-              </div>
+        {selectedIds.length > 0 && (() => {
+          const selectedInvoicesList = invoices.filter((inv) => selectedIds.includes(inv.id));
+          const singleInv = selectedInvoicesList[0];
+          const isMultiple = selectedIds.length > 1;
 
-              <div className="text-sm font-semibold text-[#222222]">
-                {invoiceToDelete.customer_name}
-              </div>
+          return (
+            <div className="space-y-4">
+              {isMultiple ? (
+                <div className="p-4 bg-red-50/60 border border-red-100 rounded-xl space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-red-700">
+                      {selectedIds.length} Invoices Selected
+                    </span>
+                    <span className="text-xs font-bold text-[#222222]">
+                      Total: {formatCurrency(selectedInvoicesList.reduce((sum, inv) => sum + Number(inv.grand_total || 0), 0))}
+                    </span>
+                  </div>
+                  <div className="text-xs text-[#4B5563] max-h-24 overflow-y-auto pt-1 border-t border-red-100/70 flex flex-wrap gap-1">
+                    {selectedInvoicesList.map((inv) => (
+                      <span key={inv.id} className="px-2 py-0.5 bg-white border border-red-200 rounded font-mono text-[11px] text-red-800">
+                        #{inv.invoice_number}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : singleInv ? (
+                <div className="p-4 bg-red-50/60 border border-red-100 rounded-xl space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-red-700">
+                      Invoice #{singleInv.invoice_number}
+                    </span>
+                    <Badge variant={singleInv.status === 'draft' ? 'draft' : 'paid'}>
+                      {singleInv.status === 'draft' ? 'Draft' : 'Final'}
+                    </Badge>
+                  </div>
 
-              <div className="flex items-center justify-between text-xs text-[#6B7280] pt-1 border-t border-red-100/70">
-                <span>Date: {formatDate(invoiceToDelete.invoice_date)}</span>
-                <span className="font-bold text-[#222222]">
-                  {formatCurrency(invoiceToDelete.grand_total)}
-                </span>
+                  <div className="text-sm font-semibold text-[#222222]">
+                    {singleInv.customer_name}
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-[#6B7280] pt-1 border-t border-red-100/70">
+                    <span>Date: {formatDate(singleInv.invoice_date)}</span>
+                    <span className="font-bold text-[#222222]">
+                      {formatCurrency(singleInv.grand_total)}
+                    </span>
+                  </div>
+                </div>
+              ) : null}
+
+              <p className="text-sm text-[#4B5563]">
+                {isMultiple
+                  ? `Are you sure you want to permanently delete these ${selectedIds.length} invoices and all of their line items?`
+                  : 'Are you sure you want to permanently delete this invoice and all of its line items?'}
+              </p>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#E5E7EB]">
+                <Button
+                  variant="secondary"
+                  size="normal"
+                  onClick={() => setIsDeleteModalOpen(false)}
+                  disabled={deleting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="danger"
+                  size="normal"
+                  icon={Trash2}
+                  loading={deleting}
+                  disabled={deleting}
+                  onClick={handleConfirmDelete}
+                  className="bg-red-600 hover:bg-red-700 text-white border-transparent"
+                >
+                  {isMultiple ? `Delete All (${selectedIds.length})` : 'Delete Invoice'}
+                </Button>
               </div>
             </div>
-
-            <p className="text-sm text-[#4B5563]">
-              Are you sure you want to permanently delete this invoice and all of its line items?
-            </p>
-
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#E5E7EB]">
-              <Button
-                variant="secondary"
-                size="normal"
-                onClick={() => setInvoiceToDelete(null)}
-                disabled={deleting}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="danger"
-                size="normal"
-                icon={Trash2}
-                loading={deleting}
-                disabled={deleting}
-                onClick={handleConfirmDelete}
-                className="bg-red-600 hover:bg-red-700 text-white border-transparent"
-              >
-                Delete Invoice
-              </Button>
-            </div>
-          </div>
-        )}
+          );
+        })()}
       </Modal>
 
       {/* Mobile Fixed Bottom Create Invoice Button */}

@@ -26,10 +26,13 @@ export function Invoices() {
   const [deleting, setDeleting] = useState(false);
   const [activePressId, setActivePressId] = useState(null);
 
+  const touchStartTime = useRef(0);
+  const touchStartPos = useRef({ x: 0, y: 0 });
   const longPressTimer = useRef(null);
   const longPressTriggeredAt = useRef(0);
   const longPressId = useRef(null);
-  const touchStartPos = useRef({ x: 0, y: 0 });
+  const lastTouchToggleAt = useRef(0);
+  const lastTouchToggleId = useRef(null);
 
   const toggleSelect = (id) => {
     setSelectedIds((prev) =>
@@ -46,7 +49,6 @@ export function Invoices() {
   };
 
   const startPressTimer = (inv) => {
-    // If already in selection mode, no need to wait for a timer
     if (selectedIds.length > 0) return;
 
     setActivePressId(inv.id);
@@ -60,12 +62,11 @@ export function Invoices() {
         try {
           navigator.vibrate(50);
         } catch {
-          // ignore vibration errors
+          // ignore
         }
       }
-      // Row is selected upon long-press; unlocks multi-selection by on-click
       toggleSelect(inv.id);
-    }, 500);
+    }, 400); // 400ms crisp mobile long-press
   };
 
   const cancelPressTimer = () => {
@@ -77,29 +78,53 @@ export function Invoices() {
   };
 
   const handleTouchStart = (inv, e) => {
-    // In selection mode, taps directly toggle selection via onClick
-    if (selectedIds.length > 0) return;
     const touch = e.touches[0];
     touchStartPos.current = { x: touch.clientX, y: touch.clientY };
-    startPressTimer(inv);
+    touchStartTime.current = Date.now();
+
+    // If not yet in selection mode, start long-press timer
+    if (selectedIds.length === 0) {
+      startPressTimer(inv);
+    }
   };
 
   const handleTouchMove = (e) => {
     if (!longPressTimer.current) return;
     const touch = e.touches[0];
-    const dx = Math.abs(touch.clientX - touchStartPos.current.x);
-    const dy = Math.abs(touch.clientY - touchStartPos.current.y);
-    if (dx > 25 || dy > 25) {
+    const dist = Math.hypot(
+      touch.clientX - touchStartPos.current.x,
+      touch.clientY - touchStartPos.current.y
+    );
+    // If movement > 15px (e.g. scrolling), cancel long-press
+    if (dist > 15) {
       cancelPressTimer();
     }
   };
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = (inv, e) => {
+    cancelPressTimer();
+    const elapsed = Date.now() - touchStartTime.current;
+    const touch = e.changedTouches ? e.changedTouches[0] : null;
+    const dist = touch
+      ? Math.hypot(
+          touch.clientX - touchStartPos.current.x,
+          touch.clientY - touchStartPos.current.y
+        )
+      : 0;
+
+    // IN SELECTION MODE: any quick tap (< 350ms, < 15px movement) directly toggles selection on mobile!
+    if (selectedIds.length > 0 && elapsed < 350 && dist < 15) {
+      lastTouchToggleAt.current = Date.now();
+      lastTouchToggleId.current = inv.id;
+      toggleSelect(inv.id);
+    }
+  };
+
+  const handleTouchCancel = () => {
     cancelPressTimer();
   };
 
   const handleMouseDown = (inv, e) => {
-    // In selection mode, clicks directly toggle selection via onClick
     if (selectedIds.length > 0) return;
     if (e.button === 0) {
       startPressTimer(inv);
@@ -123,14 +148,21 @@ export function Invoices() {
   };
 
   const handleRowClick = (inv) => {
-    // If click was fired right after the long-press trigger on this exact row, ignore it
+    // 1. If click fired right after long-press on this exact row, ignore it
     const timeSinceLongPress = Date.now() - longPressTriggeredAt.current;
-    if (timeSinceLongPress < 450 && longPressId.current === inv.id) {
+    if (timeSinceLongPress < 500 && longPressId.current === inv.id) {
       longPressId.current = null;
       return;
     }
 
-    // Once in selection mode, any other row (or any row) is selected/deselected by on-click!
+    // 2. If click was already handled by touchEnd on mobile, ignore duplicate synthetic click
+    const timeSinceTouchToggle = Date.now() - lastTouchToggleAt.current;
+    if (timeSinceTouchToggle < 500 && lastTouchToggleId.current === inv.id) {
+      lastTouchToggleId.current = null;
+      return;
+    }
+
+    // 3. Desktop mouse click toggle while in selection mode
     if (selectedIds.length > 0) {
       toggleSelect(inv.id);
       return;
@@ -269,6 +301,46 @@ export function Invoices() {
 
       {/* Main Table / State Container */}
       <div className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden shadow-xs">
+        {/* Mobile & Desktop Sticky Top Selection Bar */}
+        {selectedIds.length > 0 && (
+          <div className="bg-red-50 border-b border-red-200 px-4 py-3 flex items-center justify-between gap-3 animate-in fade-in duration-150 sticky top-0 z-20">
+            <div className="flex items-center gap-2.5">
+              <input
+                type="checkbox"
+                checked={filteredInvoices.length > 0 && selectedIds.length === filteredInvoices.length}
+                onChange={handleToggleSelectAll}
+                className="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500 cursor-pointer shrink-0"
+                title={selectedIds.length === filteredInvoices.length ? "Deselect all" : "Select all"}
+                aria-label="Select all invoices"
+              />
+              <span className="text-xs sm:text-sm font-semibold text-red-900">
+                {selectedIds.length} {selectedIds.length === 1 ? 'invoice selected' : 'invoices selected'}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                size="compact"
+                onClick={() => setSelectedIds([])}
+                className="text-xs font-medium"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="danger"
+                size="compact"
+                icon={Trash2}
+                onClick={() => setIsDeleteModalOpen(true)}
+                className="bg-red-600 hover:bg-red-700 text-white border-transparent text-xs font-semibold whitespace-nowrap shadow-xs"
+              >
+                {selectedIds.length > 1 ? `Delete All (${selectedIds.length})` : 'Delete (1)'}
+              </Button>
+            </div>
+          </div>
+        )}
+
         {loading ? (
           <div className="p-12 text-center text-sm text-[#6B7280]">
             <div className="w-8 h-8 border-2 border-[#358FFF] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
@@ -314,7 +386,7 @@ export function Invoices() {
                   <th scope="col" className="px-6 py-3">Date</th>
                   <th scope="col" className="px-6 py-3 text-right">Amount</th>
                   <th scope="col" className="px-6 py-3 text-center">Status</th>
-                  <th scope="col" className="px-6 py-3 text-right">
+                  <th scope="col" className="px-6 py-3 text-right sticky right-0 bg-gray-50/95 z-10 shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.05)]">
                     {selectedIds.length > 0 ? (
                       <div className="flex items-center justify-end gap-1.5 normal-case tracking-normal">
                         <Button
@@ -356,12 +428,18 @@ export function Invoices() {
                       onClick={() => handleRowClick(inv)}
                       onTouchStart={(e) => handleTouchStart(inv, e)}
                       onTouchMove={handleTouchMove}
-                      onTouchEnd={handleTouchEnd}
+                      onTouchEnd={(e) => handleTouchEnd(inv, e)}
+                      onTouchCancel={handleTouchCancel}
                       onMouseDown={(e) => handleMouseDown(inv, e)}
                       onMouseUp={handleMouseUp}
                       onMouseLeave={handleMouseLeave}
                       onContextMenu={(e) => handleContextMenu(inv, e)}
-                      style={{ WebkitTouchCallout: 'none' }}
+                      style={{
+                        WebkitTouchCallout: 'none',
+                        WebkitUserSelect: 'none',
+                        userSelect: 'none',
+                        touchAction: 'pan-y'
+                      }}
                       className={`transition-colors cursor-pointer select-none ${
                         isBeingPressed
                           ? 'bg-red-100/70 ring-1 ring-inset ring-red-300'
@@ -407,7 +485,9 @@ export function Invoices() {
                         </Badge>
                       </td>
                       <td
-                        className="px-6 py-4 text-right"
+                        className={`px-6 py-4 text-right sticky right-0 z-10 shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.05)] ${
+                          isSelected ? 'bg-red-50/80' : 'bg-white'
+                        }`}
                         onClick={(e) => {
                           if (isSelectionMode) {
                             // In selection mode, clicking action cell also toggles row selection
@@ -547,18 +627,20 @@ export function Invoices() {
         })()}
       </Modal>
 
-      {/* Mobile Fixed Bottom Create Invoice Button */}
-      <div className="sm:hidden fixed bottom-[calc(4rem+12px+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-40 no-print">
-        <Button
-          variant="primary"
-          size="normal"
-          icon={Plus}
-          onClick={() => navigate('/invoices/new')}
-          className="shadow-lg shadow-black/20 rounded-full px-5 py-2.5 font-semibold text-sm whitespace-nowrap active:scale-95 transition-transform"
-        >
-          Create Invoice
-        </Button>
-      </div>
+      {/* Mobile Fixed Bottom Create Invoice Button (hidden in selection mode) */}
+      {selectedIds.length === 0 && (
+        <div className="sm:hidden fixed bottom-[calc(4rem+12px+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-40 no-print">
+          <Button
+            variant="primary"
+            size="normal"
+            icon={Plus}
+            onClick={() => navigate('/invoices/new')}
+            className="shadow-lg shadow-black/20 rounded-full px-5 py-2.5 font-semibold text-sm whitespace-nowrap active:scale-95 transition-transform"
+          >
+            Create Invoice
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

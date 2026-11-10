@@ -21,9 +21,92 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script>
+      // Self-healing recovery for stale PWA service worker caches
+      (function() {
+        function recover() {
+          var key = 'wpm_recovery_attempt';
+          var lastAttempt = sessionStorage.getItem(key);
+          var now = Date.now();
+          if (!lastAttempt || (now - parseInt(lastAttempt, 10)) > 30000) {
+            sessionStorage.setItem(key, now);
+            if ('caches' in window) {
+              caches.keys().then(function(names) {
+                return Promise.all(names.map(function(n) { return caches.delete(n); }));
+              }).finally(doReload);
+            } else {
+              doReload();
+            }
+          }
+        }
+
+        function doReload() {
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(regs) {
+              Promise.all(regs.map(function(r) { return r.unregister(); })).finally(function() {
+                var url = new URL(window.location.href);
+                url.searchParams.set('reload', Date.now());
+                window.location.replace(url.toString());
+              });
+            });
+          } else {
+            var url = new URL(window.location.href);
+            url.searchParams.set('reload', Date.now());
+            window.location.replace(url.toString());
+          }
+        }
+
+        window.addEventListener('error', function(e) {
+          var msg = (e && e.message) ? e.message.toLowerCase() : '';
+          if (
+            msg.indexOf('unexpected token') !== -1 ||
+            msg.indexOf('dynamically imported module') !== -1 ||
+            msg.indexOf('failed to fetch') !== -1
+          ) {
+            recover();
+          }
+        });
+
+        setTimeout(function() {
+          var fallback = document.getElementById('wpm-initial-loader');
+          if (fallback) {
+            var notice = document.getElementById('wpm-loader-notice');
+            if (notice) notice.style.display = 'block';
+          }
+        }, 4000);
+
+        window.wpmForceReload = function() {
+          sessionStorage.removeItem('wpm_recovery_attempt');
+          if ('caches' in window) {
+            caches.keys().then(function(names) {
+              return Promise.all(names.map(function(n) { return caches.delete(n); }));
+            }).finally(doReload);
+          } else {
+            doReload();
+          }
+        };
+      })();
+    </script>
   </head>
   <body class="bg-[#F8FAFC] text-[#222222] antialiased">
-    <div id="root"></div>
+    <div id="root">
+      <div id="wpm-initial-loader" style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif; background-color: #F8FAFC; color: #1E293B; padding: 24px; text-align: center;">
+        <div style="width: 44px; height: 44px; border: 3px solid #E2E8F0; border-top-color: #358FFF; border-radius: 50%; animation: wpm-spin 0.8s linear infinite;"></div>
+        <p style="margin-top: 16px; font-size: 15px; font-weight: 600; color: #0F172A; letter-spacing: -0.01em;">Wandoor Paper Mart</p>
+        <p style="margin-top: 4px; font-size: 13px; color: #6B7280;">Loading application...</p>
+        <div id="wpm-loader-notice" style="display: none; margin-top: 20px;">
+          <p style="font-size: 12px; color: #94A3B8; margin-bottom: 12px;">Taking longer than usual?</p>
+          <button type="button" onclick="window.wpmForceReload()" style="padding: 8px 16px; background-color: #358FFF; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;">
+            Refresh & Update
+          </button>
+        </div>
+        <style>
+          @keyframes wpm-spin {
+            to { transform: rotate(360deg); }
+          }
+        </style>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

@@ -1,58 +1,23 @@
-// Wandoor Paper Mart PWA Service Worker
-const CACHE_NAME = 'wandoor-paper-mart-v1';
-const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/favicon.svg',
-  '/favicon.ico',
-  '/favicon-32x32.png',
-  '/favicon-16x16.png',
-  '/apple-touch-icon.png',
-  '/pwa-192x192.png',
-  '/pwa-512x512.png',
-  '/pwa-maskable-192x192.png',
-  '/pwa-maskable-512x512.png'
-];
+// Wandoor Paper Mart - Self-Healing Cache Cleanup Service Worker
+// Automatically purges stale PWA caches and unregisters itself
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS).catch(() => {
-        // Fallback gracefully if any single asset fails
-      });
-    })
-  );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames
-          .filter((name) => name !== CACHE_NAME)
-          .map((name) => caches.delete(name))
-      );
+    caches.keys().then((keys) => {
+      return Promise.all(keys.map((k) => caches.delete(k)));
+    }).then(() => {
+      return self.registration.unregister();
+    }).then(() => {
+      return self.clients.claim();
     })
   );
-  self.clients.claim();
 });
 
-self.addEventListener('fetch', (event) => {
-  // Only handle GET requests and http/https schemes
-  if (event.request.method !== 'GET') return;
-  if (!event.request.url.startsWith('http')) return;
-
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).catch(() => {
-        // Offline fallback if needed
-        return caches.match('/');
-      });
-    })
-  );
+// Bypass cache completely: let all network requests pass through directly
+self.addEventListener('fetch', () => {
+  // Do not intercept - allow standard network fetch
 });

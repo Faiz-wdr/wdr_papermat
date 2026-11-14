@@ -127,9 +127,10 @@ export function CreateInvoice() {
   };
 
   const handleAddCustomItem = (name = '') => {
+    const isNumericHsn = /^\d{4,8}$/.test(name.trim());
     const blankItem = calculateItemTotals({
-      item_name: name,
-      hsn_code: '',
+      item_name: isNumericHsn ? '' : name,
+      hsn_code: isNumericHsn ? name.trim() : '',
       uom: 'PCS',
       qty: 1,
       unit_rate: 0,

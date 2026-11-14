@@ -251,80 +251,114 @@ export function InvoiceItemsTable({
                 )}
               </div>
 
-              {/* Editable Controls: Qty, UOM, Unit Rate, GST */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
-                <div>
-                  <label className="text-[11px] font-semibold text-[#6B7280] block mb-1">
-                    Quantity
-                  </label>
-                  {disabled ? (
-                    <div className="font-semibold text-sm text-[#222222]">{calc.qty}</div>
-                  ) : (
-                    <input
-                      type="number"
-                      min="0.01"
-                      step="any"
-                      value={calc.qty === '' ? '' : calc.qty}
-                      onChange={(e) => handleItemFieldChange(index, 'qty', e.target.value)}
-                      className="w-full h-10 px-2.5 text-center font-semibold text-sm text-[#222222] border border-[#E5E7EB] rounded-lg focus:border-[#358FFF] focus:outline-none"
-                    />
-                  )}
+              {/* Editable Controls: HSN Code, Qty, UOM, Unit Rate, GST */}
+              <div className="space-y-2.5 sm:space-y-0 sm:grid sm:grid-cols-5 sm:gap-2.5 pt-1">
+                {/* Row 1 on mobile: HSN Code, Quantity, UOM */}
+                <div className="grid grid-cols-3 gap-2 sm:contents">
+                  <div>
+                    <label className="text-[11px] font-semibold text-[#6B7280] block mb-1">
+                      HSN Code
+                    </label>
+                    {disabled ? (
+                      <div className="font-mono text-xs font-semibold text-[#6B7280] h-10 flex items-center px-1">
+                        {calc.hsn_code || '-'}
+                      </div>
+                    ) : (
+                      <input
+                        type="text"
+                        value={calc.hsn_code || ''}
+                        onChange={(e) => handleItemFieldChange(index, 'hsn_code', e.target.value)}
+                        placeholder="HSN"
+                        className="w-full h-10 px-2 font-mono text-xs text-[#222222] border border-[#E5E7EB] rounded-lg focus:border-[#358FFF] focus:outline-none"
+                      />
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-semibold text-[#6B7280] block mb-1">
+                      Quantity
+                    </label>
+                    {disabled ? (
+                      <div className="font-semibold text-sm text-[#222222] h-10 flex items-center justify-center">
+                        {calc.qty}
+                      </div>
+                    ) : (
+                      <input
+                        type="number"
+                        min="0.01"
+                        step="any"
+                        value={calc.qty === '' ? '' : calc.qty}
+                        onChange={(e) => handleItemFieldChange(index, 'qty', e.target.value)}
+                        className="w-full h-10 px-2 text-center font-semibold text-sm text-[#222222] border border-[#E5E7EB] rounded-lg focus:border-[#358FFF] focus:outline-none"
+                      />
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-semibold text-[#6B7280] block mb-1">
+                      UOM
+                    </label>
+                    {disabled ? (
+                      <div className="text-xs font-semibold text-[#222222] h-10 flex items-center px-1">
+                        {calc.uom}
+                      </div>
+                    ) : (
+                      <select
+                        value={calc.uom || 'PCS'}
+                        onChange={(e) => handleItemFieldChange(index, 'uom', e.target.value)}
+                        className="w-full h-10 px-1.5 text-xs font-medium text-[#222222] border border-[#E5E7EB] rounded-lg focus:border-[#358FFF] focus:outline-none bg-white cursor-pointer"
+                      >
+                        {UOM_OPTIONS.map((u) => (
+                          <option key={u} value={u}>{u}</option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
                 </div>
 
-                <div>
-                  <label className="text-[11px] font-semibold text-[#6B7280] block mb-1">
-                    UOM
-                  </label>
-                  {disabled ? (
-                    <div className="text-xs font-semibold text-[#222222]">{calc.uom}</div>
-                  ) : (
-                    <select
-                      value={calc.uom || 'PCS'}
-                      onChange={(e) => handleItemFieldChange(index, 'uom', e.target.value)}
-                      className="w-full h-10 px-2 text-xs font-medium text-[#222222] border border-[#E5E7EB] rounded-lg focus:border-[#358FFF] focus:outline-none bg-white cursor-pointer"
-                    >
-                      {UOM_OPTIONS.map((u) => (
-                        <option key={u} value={u}>{u}</option>
-                      ))}
-                    </select>
-                  )}
-                </div>
+                {/* Row 2 on mobile: Unit Rate (₹), GST Rate */}
+                <div className="grid grid-cols-2 gap-2 sm:contents">
+                  <div>
+                    <label className="text-[11px] font-semibold text-[#6B7280] block mb-1">
+                      Unit Rate (₹)
+                    </label>
+                    {disabled ? (
+                      <div className="font-semibold text-sm text-[#222222] h-10 flex items-center px-1">
+                        {formatCurrency(calc.unit_rate)}
+                      </div>
+                    ) : (
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={calc.unit_rate === '' ? '' : calc.unit_rate}
+                        onChange={(e) => handleItemFieldChange(index, 'unit_rate', e.target.value)}
+                        placeholder="0.00"
+                        className="w-full h-10 px-2.5 text-right font-semibold text-sm text-[#222222] border border-[#E5E7EB] rounded-lg focus:border-[#358FFF] focus:outline-none"
+                      />
+                    )}
+                  </div>
 
-                <div>
-                  <label className="text-[11px] font-semibold text-[#6B7280] block mb-1">
-                    Unit Rate (₹)
-                  </label>
-                  {disabled ? (
-                    <div className="font-semibold text-sm text-[#222222]">{formatCurrency(calc.unit_rate)}</div>
-                  ) : (
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={calc.unit_rate === '' ? '' : calc.unit_rate}
-                      onChange={(e) => handleItemFieldChange(index, 'unit_rate', e.target.value)}
-                      className="w-full h-10 px-2.5 text-right font-semibold text-sm text-[#222222] border border-[#E5E7EB] rounded-lg focus:border-[#358FFF] focus:outline-none"
-                    />
-                  )}
-                </div>
-
-                <div>
-                  <label className="text-[11px] font-semibold text-[#6B7280] block mb-1">
-                    GST Rate
-                  </label>
-                  {disabled ? (
-                    <div className="text-xs font-semibold text-[#222222]">{calc.gst_rate}%</div>
-                  ) : (
-                    <select
-                      value={calc.gst_rate}
-                      onChange={(e) => handleItemFieldChange(index, 'gst_rate', e.target.value)}
-                      className="w-full h-10 px-2 text-xs font-medium text-[#222222] border border-[#E5E7EB] rounded-lg focus:border-[#358FFF] focus:outline-none bg-white cursor-pointer"
-                    >
-                      {GST_RATE_OPTIONS.map((r) => (
-                        <option key={r} value={r}>{r}% GST</option>
-                      ))}
-                    </select>
-                  )}
+                  <div>
+                    <label className="text-[11px] font-semibold text-[#6B7280] block mb-1">
+                      GST Rate
+                    </label>
+                    {disabled ? (
+                      <div className="text-xs font-semibold text-[#222222] h-10 flex items-center px-1">
+                        {calc.gst_rate}%
+                      </div>
+                    ) : (
+                      <select
+                        value={calc.gst_rate}
+                        onChange={(e) => handleItemFieldChange(index, 'gst_rate', e.target.value)}
+                        className="w-full h-10 px-2 text-xs font-medium text-[#222222] border border-[#E5E7EB] rounded-lg focus:border-[#358FFF] focus:outline-none bg-white cursor-pointer"
+                      >
+                        {GST_RATE_OPTIONS.map((r) => (
+                          <option key={r} value={r}>{r}% GST</option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
                 </div>
               </div>
 

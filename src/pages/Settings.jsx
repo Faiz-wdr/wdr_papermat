@@ -87,7 +87,6 @@ export function Settings() {
     try {
       setSaving(true);
       setError(null);
-      setSuccessMessage(null);
 
       if (!supabase) throw new Error('Supabase is not connected');
 

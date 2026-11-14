@@ -23,7 +23,13 @@ export function MobileNav() {
   return (
     <>
       {/* Mobile Top Header */}
-      <header className="md:hidden sticky top-0 z-40 bg-white border-b border-[#E5E7EB] h-14 px-4 flex items-center justify-between">
+      <header
+        className="md:hidden sticky top-0 z-40 bg-white border-b border-[#E5E7EB] px-4 flex items-center justify-between"
+        style={{
+          paddingTop: 'env(safe-area-inset-top, 0px)',
+          minHeight: 'calc(3.5rem + env(safe-area-inset-top, 0px))',
+        }}
+      >
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-white border border-[#E5E7EB] flex items-center justify-center p-1 shrink-0 shadow-2xs">
             <img src="/favicon.svg" alt="Wandoor Paper Mart" className="w-full h-full object-contain" />
@@ -45,7 +51,11 @@ export function MobileNav() {
 
       {/* Mobile Bottom Fixed Navigation */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#E5E7EB] h-16 flex items-center justify-around px-2 pb-safe"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#E5E7EB] flex items-center justify-around px-2"
+        style={{
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+          minHeight: 'calc(4rem + env(safe-area-inset-bottom, 0px))',
+        }}
         aria-label="Mobile bottom navigation"
       >
         {navItems.map((item) => {

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Save, CheckCircle, Calendar, Hash } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { calculateInvoiceTotals, calculateItemTotals } from '../utils/invoiceCalculations';
+import { calculateInvoiceTotals, calculateItemTotals, round2 } from '../utils/invoiceCalculations';
 import { validateInvoice } from '../utils/invoiceValidation';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
@@ -39,6 +39,8 @@ export function CreateInvoice() {
 
   // Line Items State
   const [items, setItems] = useState([]);
+  const [isRounded, setIsRounded] = useState(false);
+  const [customRoundOff, setCustomRoundOff] = useState(null);
 
   useEffect(() => {
     if (isEditing) {
@@ -113,6 +115,21 @@ export function CreateInvoice() {
       }));
 
       setItems(formattedItems);
+
+      // Check if existing invoice was saved with a round-off
+      const subtotal = round2(
+        (Number(invoice.taxable_value) || 0) +
+        (Number(invoice.total_cgst) || 0) +
+        (Number(invoice.total_sgst) || 0)
+      );
+      const diff = round2((Number(invoice.grand_total) || 0) - subtotal);
+      if (Math.abs(diff) > 0.001) {
+        setIsRounded(true);
+        setCustomRoundOff(diff);
+      } else {
+        setIsRounded(false);
+        setCustomRoundOff(null);
+      }
     } catch (err) {
       console.error('Error loading invoice:', err);
       setError(err.message || 'Unable to load invoice details.');
@@ -163,7 +180,7 @@ export function CreateInvoice() {
     try {
       if (!supabase) throw new Error('Supabase client is not connected.');
 
-      const totals = calculateInvoiceTotals(items);
+      const totals = calculateInvoiceTotals(items, { isRounded, customRoundOff });
 
       const invoicePayload = {
         id: isEditing ? id : undefined,
@@ -380,7 +397,13 @@ export function CreateInvoice() {
       {/* Totals & Summary */}
       <div className="flex justify-end">
         <div className="w-full md:max-w-md lg:max-w-lg">
-          <InvoiceSummary items={items} />
+          <InvoiceSummary
+            items={items}
+            isRounded={isRounded}
+            onToggleRound={setIsRounded}
+            customRoundOff={customRoundOff}
+            onChangeCustomRoundOff={setCustomRoundOff}
+          />
         </div>
       </div>
     </div>

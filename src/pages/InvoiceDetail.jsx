@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { formatCurrency, formatDate, formatGSTRate } from '../utils/formatters';
-import { numberToWordsINR } from '../utils/invoiceCalculations';
+import { numberToWordsINR, round2 } from '../utils/invoiceCalculations';
 import { downloadInvoicePDF } from '../utils/pdfGenerator';
 import { useToast } from '../context/ToastContext';
 import { Button } from '../components/ui/Button';
@@ -199,6 +199,12 @@ export function InvoiceDetail() {
 
   const isDraft = invoice.status === 'draft';
   const totalQty = items.reduce((acc, it) => acc + (Number(it.qty) || 0), 0);
+  const roundOff = invoice ? round2(
+    (Number(invoice.grand_total) || 0) -
+    ((Number(invoice.taxable_value) || 0) +
+     (Number(invoice.total_cgst) || 0) +
+     (Number(invoice.total_sgst) || 0))
+  ) : 0;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -537,6 +543,12 @@ export function InvoiceDetail() {
                 <span>Total SGST:</span>
                 <span>{formatCurrency(invoice.total_sgst)}</span>
               </div>
+              {Math.abs(roundOff) > 0.001 && (
+                <div className="flex justify-between p-2 font-medium text-xs text-[#6B7280]">
+                  <span>Round Off:</span>
+                  <span>{roundOff > 0 ? `+${formatCurrency(roundOff)}` : `-${formatCurrency(Math.abs(roundOff))}`}</span>
+                </div>
+              )}
               <div className="flex justify-between p-3 font-extrabold text-base bg-gray-100">
                 <span>Grand Total:</span>
                 <span className="text-[#358FFF]">{formatCurrency(invoice.grand_total)}</span>

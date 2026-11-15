@@ -43,14 +43,15 @@ export function calculateItemTotals(item) {
 }
 
 /**
- * Calculate aggregate invoice totals across all line items
+ * Calculate aggregate invoice totals across all line items.
+ * Supports optional amount rounding (to nearest rupee or custom round-off).
  */
-export function calculateInvoiceTotals(items = []) {
+export function calculateInvoiceTotals(items = [], options = {}) {
   let totalQty = 0;
   let taxableValue = 0;
   let totalCGST = 0;
   let totalSGST = 0;
-  let grandTotal = 0;
+  let unroundedTotal = 0;
 
   // Breakdown by GST rate if needed
   const gstBreakdown = {};
@@ -61,7 +62,7 @@ export function calculateInvoiceTotals(items = []) {
     taxableValue += calculated.taxable_value;
     totalCGST += calculated.cgst_amount;
     totalSGST += calculated.sgst_amount;
-    grandTotal += calculated.total;
+    unroundedTotal += calculated.total;
 
     const rateKey = calculated.gst_rate;
     if (!gstBreakdown[rateKey]) {
@@ -81,12 +82,36 @@ export function calculateInvoiceTotals(items = []) {
     gstBreakdown[rateKey].total += calculated.total;
   });
 
+  totalQty = round2(totalQty);
+  taxableValue = round2(taxableValue);
+  totalCGST = round2(totalCGST);
+  totalSGST = round2(totalSGST);
+  unroundedTotal = round2(unroundedTotal);
+
+  // Amount Rounding logic
+  const isRounded = Boolean(typeof options === 'boolean' ? options : options?.isRounded);
+  let roundOff = 0;
+  let grandTotal = unroundedTotal;
+
+  if (isRounded) {
+    if (typeof options?.customRoundOff === 'number' && !isNaN(options.customRoundOff)) {
+      roundOff = round2(options.customRoundOff);
+      grandTotal = round2(unroundedTotal + roundOff);
+    } else {
+      grandTotal = round2(Math.round(unroundedTotal));
+      roundOff = round2(grandTotal - unroundedTotal);
+    }
+  }
+
   return {
-    totalQty: round2(totalQty),
-    taxableValue: round2(taxableValue),
-    totalCGST: round2(totalCGST),
-    totalSGST: round2(totalSGST),
-    grandTotal: round2(grandTotal),
+    totalQty,
+    taxableValue,
+    totalCGST,
+    totalSGST,
+    unroundedTotal,
+    roundOff,
+    grandTotal,
+    isRounded,
     gstBreakdown,
   };
 }

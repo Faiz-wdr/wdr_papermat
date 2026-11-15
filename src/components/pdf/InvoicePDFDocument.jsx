@@ -307,6 +307,14 @@ function formatDateStr(dateVal) {
 
 export function InvoicePDFDocument({ invoice, items = [], businessSettings = {} }) {
   const totalQty = items.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
+  const roundOff = Number(
+    (
+      (Number(invoice?.grand_total) || 0) -
+      ((Number(invoice?.taxable_value) || 0) +
+        (Number(invoice?.total_cgst) || 0) +
+        (Number(invoice?.total_sgst) || 0))
+    ).toFixed(2)
+  );
 
   return (
     <Document title={`Invoice ${invoice?.invoice_number || ''}`}>
@@ -574,6 +582,14 @@ export function InvoicePDFDocument({ invoice, items = [], businessSettings = {} 
                     Rs. {formatNum(invoice?.total_sgst)}
                   </Text>
                 </View>
+                {Math.abs(roundOff) > 0.001 && (
+                  <View style={styles.summaryRow}>
+                    <Text>Round Off :</Text>
+                    <Text style={{ fontFamily: 'Helvetica-Bold' }}>
+                      {roundOff > 0 ? `+Rs. ${formatNum(roundOff)}` : `-Rs. ${formatNum(Math.abs(roundOff))}`}
+                    </Text>
+                  </View>
+                )}
                 <View style={styles.grandTotalRow}>
                   <Text>Grand Total :</Text>
                   <Text>Rs. {formatNum(invoice?.grand_total)}</Text>

@@ -121,9 +121,9 @@ export function CreateInvoice() {
         (Number(invoice.total_cgst) || 0) +
         (Number(invoice.total_sgst) || 0)
       );
-      const diff = round2((Number(invoice.grand_total) || 0) - subtotal);
-      if (Math.abs(diff) > 0.001) {
-        setRoundOff(diff > 0 ? `+${diff}` : String(diff));
+      const diff = round2(subtotal - (Number(invoice.grand_total) || 0));
+      if (diff > 0.001) {
+        setRoundOff(String(diff));
       } else {
         setRoundOff('');
       }

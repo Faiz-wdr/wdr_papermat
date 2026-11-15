@@ -200,10 +200,10 @@ export function InvoiceDetail() {
   const isDraft = invoice.status === 'draft';
   const totalQty = items.reduce((acc, it) => acc + (Number(it.qty) || 0), 0);
   const roundOff = invoice ? round2(
-    (Number(invoice.grand_total) || 0) -
     ((Number(invoice.taxable_value) || 0) +
      (Number(invoice.total_cgst) || 0) +
-     (Number(invoice.total_sgst) || 0))
+     (Number(invoice.total_sgst) || 0)) -
+    (Number(invoice.grand_total) || 0)
   ) : 0;
 
   return (
@@ -543,10 +543,10 @@ export function InvoiceDetail() {
                 <span>Total SGST:</span>
                 <span>{formatCurrency(invoice.total_sgst)}</span>
               </div>
-              {Math.abs(roundOff) > 0.001 && (
+              {roundOff > 0.001 && (
                 <div className="flex justify-between p-2 font-medium text-xs text-[#6B7280]">
                   <span>Round Off:</span>
-                  <span>{roundOff > 0 ? `+${formatCurrency(roundOff)}` : `-${formatCurrency(Math.abs(roundOff))}`}</span>
+                  <span className="font-mono text-red-600">-{formatCurrency(roundOff)}</span>
                 </div>
               )}
               <div className="flex justify-between p-3 font-extrabold text-base bg-gray-100">

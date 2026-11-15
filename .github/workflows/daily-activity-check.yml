@@ -1,0 +1,45 @@
+name: Supabase Daily Activity Check
+
+on:
+  schedule:
+    # Runs everyday at 04:30 UTC (10:00 AM IST)
+    - cron: '30 4 * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab anytime
+
+jobs:
+  ping-database:
+    name: Execute Daily Activity Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Invoke Supabase Edge Function
+        env:
+          FUNCTION_URL: ${{ secrets.SUPABASE_ACTIVITY_CHECK_URL }}
+          SECRET_TOKEN: ${{ secrets.ACTIVITY_CHECK_SECRET }}
+        run: |
+          if [ -z "$FUNCTION_URL" ] || [ -z "$SECRET_TOKEN" ]; then
+            echo "::error::Missing required GitHub repository secrets: SUPABASE_ACTIVITY_CHECK_URL or ACTIVITY_CHECK_SECRET."
+            echo "Please configure them under Repository Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+
+          echo "Invoking Supabase daily-activity-check Edge Function..."
+          
+          # Perform POST request passing secret token in Authorization and custom header
+          RESPONSE=$(curl -sS -w "\nHTTP_STATUS:%{http_code}" \
+            -X POST "$FUNCTION_URL" \
+            -H "Authorization: Bearer $SECRET_TOKEN" \
+            -H "x-activity-key: $SECRET_TOKEN" \
+            -H "Content-Type: application/json")
+
+          BODY=$(echo "$RESPONSE" | sed -e '$d')
+          STATUS=$(echo "$RESPONSE" | tail -n1 | cut -d':' -f2)
+
+          echo "Response HTTP Status: $STATUS"
+          echo "Response Body: $BODY"
+
+          if [ "$STATUS" -ne 200 ]; then
+            echo "::error::Activity check failed with HTTP status $STATUS"
+            exit 1
+          fi
+
+          echo "Daily activity check completed successfully."

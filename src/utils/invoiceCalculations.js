@@ -88,20 +88,19 @@ export function calculateInvoiceTotals(items = [], options = {}) {
   totalSGST = round2(totalSGST);
   unroundedTotal = round2(unroundedTotal);
 
-  // Amount Rounding logic
-  const isRounded = Boolean(typeof options === 'boolean' ? options : options?.isRounded);
-  let roundOff = 0;
-  let grandTotal = unroundedTotal;
-
-  if (isRounded) {
-    if (typeof options?.customRoundOff === 'number' && !isNaN(options.customRoundOff)) {
-      roundOff = round2(options.customRoundOff);
-      grandTotal = round2(unroundedTotal + roundOff);
-    } else {
-      grandTotal = round2(Math.round(unroundedTotal));
-      roundOff = round2(grandTotal - unroundedTotal);
-    }
+  // Amount Rounding logic (supports direct typed roundOff or boolean isRounded)
+  let parsedRoundOff = 0;
+  if (options && options.roundOff !== undefined && options.roundOff !== null && options.roundOff !== '') {
+    parsedRoundOff = Number(options.roundOff);
+    if (isNaN(parsedRoundOff)) parsedRoundOff = 0;
+  } else if (typeof options?.customRoundOff === 'number' && !isNaN(options.customRoundOff)) {
+    parsedRoundOff = options.customRoundOff;
+  } else if (options?.isRounded) {
+    parsedRoundOff = Math.round(unroundedTotal) - unroundedTotal;
   }
+
+  const roundOff = round2(parsedRoundOff);
+  const grandTotal = round2(unroundedTotal + roundOff);
 
   return {
     totalQty,
@@ -111,7 +110,7 @@ export function calculateInvoiceTotals(items = [], options = {}) {
     unroundedTotal,
     roundOff,
     grandTotal,
-    isRounded,
+    isRounded: roundOff !== 0,
     gstBreakdown,
   };
 }

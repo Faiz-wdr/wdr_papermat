@@ -39,8 +39,7 @@ export function CreateInvoice() {
 
   // Line Items State
   const [items, setItems] = useState([]);
-  const [isRounded, setIsRounded] = useState(false);
-  const [customRoundOff, setCustomRoundOff] = useState(null);
+  const [roundOff, setRoundOff] = useState('');
 
   useEffect(() => {
     if (isEditing) {
@@ -124,11 +123,9 @@ export function CreateInvoice() {
       );
       const diff = round2((Number(invoice.grand_total) || 0) - subtotal);
       if (Math.abs(diff) > 0.001) {
-        setIsRounded(true);
-        setCustomRoundOff(diff);
+        setRoundOff(diff > 0 ? `+${diff}` : String(diff));
       } else {
-        setIsRounded(false);
-        setCustomRoundOff(null);
+        setRoundOff('');
       }
     } catch (err) {
       console.error('Error loading invoice:', err);
@@ -180,7 +177,7 @@ export function CreateInvoice() {
     try {
       if (!supabase) throw new Error('Supabase client is not connected.');
 
-      const totals = calculateInvoiceTotals(items, { isRounded, customRoundOff });
+      const totals = calculateInvoiceTotals(items, { roundOff });
 
       const invoicePayload = {
         id: isEditing ? id : undefined,
@@ -399,10 +396,8 @@ export function CreateInvoice() {
         <div className="w-full md:max-w-md lg:max-w-lg">
           <InvoiceSummary
             items={items}
-            isRounded={isRounded}
-            onToggleRound={setIsRounded}
-            customRoundOff={customRoundOff}
-            onChangeCustomRoundOff={setCustomRoundOff}
+            roundOff={roundOff}
+            onChangeRoundOff={setRoundOff}
           />
         </div>
       </div>

@@ -320,111 +320,114 @@ export function InvoicePDFDocument({ invoice, items = [], businessSettings = {} 
     <Document title={`Invoice ${invoice?.invoice_number || ''}`}>
       <Page size="A4" style={styles.page}>
         <View style={styles.container}>
-          {/* 1. Header: Store Branding */}
-          <View style={styles.header}>
-            <Text style={styles.businessName}>
-              {businessSettings?.business_name || 'WANDOOR PAPER MART'}
-            </Text>
-            <Text style={styles.businessAddress}>
-              {businessSettings?.address || 'Main Road, Near Bus Stand, Wandoor, Malappuram, Kerala - 679328'}
-            </Text>
-            <Text style={styles.businessContact}>
-              Mobile: {businessSettings?.mobile || '9876543210'}
-            </Text>
-          </View>
-
-          {/* 2. Banner */}
-          <View style={styles.banner}>
-            <Text style={styles.bannerText}>TAX INVOICE</Text>
-          </View>
-
-          {/* 3. Metadata Grid (Row 1: Invoice Meta & Transportation Mode) */}
-          <View style={styles.metaGrid}>
-            <View style={styles.metaLeft}>
-              <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>GST No :</Text>
-                <Text style={[styles.metaValue, { fontFamily: 'Helvetica-Bold' }]}>
-                  {businessSettings?.gst_no || '32ABCDE1234F1Z5'}
-                </Text>
-              </View>
-              <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Invoice No :</Text>
-                <Text style={[styles.metaValue, { fontFamily: 'Helvetica-Bold' }]}>
-                  {invoice?.invoice_number || '-'}
-                </Text>
-              </View>
-              <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Invoice Date :</Text>
-                <Text style={styles.metaValue}>
-                  {formatDateStr(invoice?.invoice_date)}
-                </Text>
-              </View>
+          {/* Header Details (Repeats on every page if invoice exceeds to next page) */}
+          <View fixed>
+            {/* 1. Header: Store Branding */}
+            <View style={styles.header}>
+              <Text style={styles.businessName}>
+                {businessSettings?.business_name || 'WANDOOR PAPER MART'}
+              </Text>
+              <Text style={styles.businessAddress}>
+                {businessSettings?.address || 'Main Road, Near Bus Stand, Wandoor, Malappuram, Kerala - 679328'}
+              </Text>
+              <Text style={styles.businessContact}>
+                Mobile: {businessSettings?.mobile || '9876543210'}
+              </Text>
             </View>
 
-            <View style={styles.metaRight}>
-              <Text style={styles.metaHeading}>Transportation Mode</Text>
-              <View style={styles.metaRow}>
-                <Text style={[styles.metaLabel, { width: 120 }]}>Vehicle No. :</Text>
-                <Text style={styles.metaValue}>{invoice?.vehicle_no || ''}</Text>
-              </View>
-              <View style={styles.metaRow}>
-                <Text style={[styles.metaLabel, { width: 120 }]}>Date & Time of Supply :</Text>
-                <Text style={styles.metaValue}>{invoice?.supply_date ? formatDateStr(invoice.supply_date) : ''}</Text>
-              </View>
+            {/* 2. Banner */}
+            <View style={styles.banner}>
+              <Text style={styles.bannerText}>TAX INVOICE</Text>
             </View>
-          </View>
 
-          {/* 4. Parties Grid (Row 2: Billed To & Shipped To) */}
-          <View style={styles.partyGrid}>
-            {/* Bottom Left: Receiver (Billed To) */}
-            <View style={styles.partyLeft}>
-              <Text style={styles.metaHeading}>Details Of Receiver (Billed To)</Text>
-              <View style={styles.metaRow}>
-                <Text style={[styles.metaLabel, { width: 55 }]}>Name :</Text>
-                <Text style={[styles.metaValue, { fontFamily: 'Helvetica-Bold' }]}>
-                  {invoice?.customer_name || '-'}
-                </Text>
-              </View>
-              {Boolean(invoice?.customer_address) && (
+            {/* 3. Metadata Grid (Row 1: Invoice Meta & Transportation Mode) */}
+            <View style={styles.metaGrid}>
+              <View style={styles.metaLeft}>
                 <View style={styles.metaRow}>
-                  <Text style={[styles.metaLabel, { width: 55 }]}>Address :</Text>
-                  <Text style={styles.metaValue}>{invoice.customer_address}</Text>
-                </View>
-              )}
-              {Boolean(invoice?.customer_mobile) && (
-                <View style={styles.metaRow}>
-                  <Text style={[styles.metaLabel, { width: 55 }]}>Mobile :</Text>
-                  <Text style={styles.metaValue}>{invoice.customer_mobile}</Text>
-                </View>
-              )}
-              {Boolean(invoice?.customer_gst_no) && (
-                <View style={styles.metaRow}>
-                  <Text style={[styles.metaLabel, { width: 55 }]}>GST No :</Text>
+                  <Text style={styles.metaLabel}>GST No :</Text>
                   <Text style={[styles.metaValue, { fontFamily: 'Helvetica-Bold' }]}>
-                    {invoice.customer_gst_no}
+                    {businessSettings?.gst_no || '32ABCDE1234F1Z5'}
                   </Text>
                 </View>
-              )}
-              <View style={styles.metaRow}>
-                <Text style={[styles.metaLabel, { width: 55 }]}>State :</Text>
-                <Text style={styles.metaValue}>Kerala (32)</Text>
+                <View style={styles.metaRow}>
+                  <Text style={styles.metaLabel}>Invoice No :</Text>
+                  <Text style={[styles.metaValue, { fontFamily: 'Helvetica-Bold' }]}>
+                    {invoice?.invoice_number || '-'}
+                  </Text>
+                </View>
+                <View style={styles.metaRow}>
+                  <Text style={styles.metaLabel}>Invoice Date :</Text>
+                  <Text style={styles.metaValue}>
+                    {formatDateStr(invoice?.invoice_date)}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.metaRight}>
+                <Text style={styles.metaHeading}>Transportation Mode</Text>
+                <View style={styles.metaRow}>
+                  <Text style={[styles.metaLabel, { width: 120 }]}>Vehicle No. :</Text>
+                  <Text style={styles.metaValue}>{invoice?.vehicle_no || ''}</Text>
+                </View>
+                <View style={styles.metaRow}>
+                  <Text style={[styles.metaLabel, { width: 120 }]}>Date & Time of Supply :</Text>
+                  <Text style={styles.metaValue}>{invoice?.supply_date ? formatDateStr(invoice.supply_date) : ''}</Text>
+                </View>
               </View>
             </View>
 
-            {/* Bottom Right: Consignee (Shipped To) */}
-            <View style={styles.partyRight}>
-              <Text style={styles.metaHeading}>Details of Consignee (Shipped To)</Text>
-              <View style={styles.metaRow}>
-                <Text style={[styles.metaLabel, { width: 55 }]}>Name :</Text>
-                <Text style={[styles.metaValue, { fontFamily: 'Helvetica-Bold' }]}>
-                  {invoice?.consignee_name || ''}
-                </Text>
+            {/* 4. Parties Grid (Row 2: Billed To & Shipped To) */}
+            <View style={styles.partyGrid}>
+              {/* Bottom Left: Receiver (Billed To) */}
+              <View style={styles.partyLeft}>
+                <Text style={styles.metaHeading}>Details Of Receiver (Billed To)</Text>
+                <View style={styles.metaRow}>
+                  <Text style={[styles.metaLabel, { width: 55 }]}>Name :</Text>
+                  <Text style={[styles.metaValue, { fontFamily: 'Helvetica-Bold' }]}>
+                    {invoice?.customer_name || '-'}
+                  </Text>
+                </View>
+                {Boolean(invoice?.customer_address) && (
+                  <View style={styles.metaRow}>
+                    <Text style={[styles.metaLabel, { width: 55 }]}>Address :</Text>
+                    <Text style={styles.metaValue}>{invoice.customer_address}</Text>
+                  </View>
+                )}
+                {Boolean(invoice?.customer_mobile) && (
+                  <View style={styles.metaRow}>
+                    <Text style={[styles.metaLabel, { width: 55 }]}>Mobile :</Text>
+                    <Text style={styles.metaValue}>{invoice.customer_mobile}</Text>
+                  </View>
+                )}
+                {Boolean(invoice?.customer_gst_no) && (
+                  <View style={styles.metaRow}>
+                    <Text style={[styles.metaLabel, { width: 55 }]}>GST No :</Text>
+                    <Text style={[styles.metaValue, { fontFamily: 'Helvetica-Bold' }]}>
+                      {invoice.customer_gst_no}
+                    </Text>
+                  </View>
+                )}
+                <View style={styles.metaRow}>
+                  <Text style={[styles.metaLabel, { width: 55 }]}>State :</Text>
+                  <Text style={styles.metaValue}>Kerala (32)</Text>
+                </View>
               </View>
-              <View style={styles.metaRow}>
-                <Text style={[styles.metaLabel, { width: 55 }]}>Address :</Text>
-                <Text style={styles.metaValue}>
-                  {invoice?.consignee_address || ''}
-                </Text>
+
+              {/* Bottom Right: Consignee (Shipped To) */}
+              <View style={styles.partyRight}>
+                <Text style={styles.metaHeading}>Details of Consignee (Shipped To)</Text>
+                <View style={styles.metaRow}>
+                  <Text style={[styles.metaLabel, { width: 55 }]}>Name :</Text>
+                  <Text style={[styles.metaValue, { fontFamily: 'Helvetica-Bold' }]}>
+                    {invoice?.consignee_name || ''}
+                  </Text>
+                </View>
+                <View style={styles.metaRow}>
+                  <Text style={[styles.metaLabel, { width: 55 }]}>Address :</Text>
+                  <Text style={styles.metaValue}>
+                    {invoice?.consignee_address || ''}
+                  </Text>
+                </View>
               </View>
             </View>
           </View>

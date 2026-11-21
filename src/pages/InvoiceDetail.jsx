@@ -354,10 +354,10 @@ export function InvoiceDetail() {
           TAX INVOICE
         </div>
 
-        {/* 3. Top Boxed Details Grid */}
+        {/* 3. Top Boxed Details Grid: Row 1 (Invoice Metadata & Transportation Mode) */}
         <div className="grid grid-cols-1 md:grid-cols-2 border-b border-[#222222] text-xs">
-          {/* Left: Invoice Metadata */}
-          <div className="p-4 border-b md:border-b-0 md:border-r border-[#222222] space-y-1.5">
+          {/* Top Left: Invoice Metadata */}
+          <div className="p-4 border-b md:border-b-0 md:border-r border-[#222222] space-y-1.5 bg-white">
             <div className="flex">
               <span className="font-bold w-28">GST No :</span>
               <span className="font-mono font-semibold">{businessSettings?.gst_no || '32ABCDE1234F1Z5'}</span>
@@ -372,52 +372,82 @@ export function InvoiceDetail() {
             </div>
           </div>
 
-          {/* Right: Supply Info */}
+          {/* Top Right: Transportation Mode */}
           <div className="p-4 space-y-1.5 bg-gray-50/40">
             <div className="font-bold text-[11px] uppercase tracking-wide text-[#6B7280] pb-1 border-b border-gray-200">
-              Supply & Delivery Information
+              Transportation Mode
             </div>
             <div className="flex">
-              <span className="text-[#6B7280] w-36">Place of Supply :</span>
-              <span className="font-medium">Kerala (State Code: 32)</span>
+              <span className="text-[#6B7280] w-40">Vehicle No. :</span>
+              <span className="font-medium">{invoice.vehicle_no || '-'}</span>
             </div>
             <div className="flex">
-              <span className="text-[#6B7280] w-36">Supply Category :</span>
-              <span className="font-medium">Intra-State B2B / B2C</span>
+              <span className="text-[#6B7280] w-40">Date & Time of Supply :</span>
+              <span className="font-medium">{formatDate(invoice.supply_date || invoice.invoice_date)}</span>
+            </div>
+            <div className="flex">
+              <span className="text-[#6B7280] w-40">Place of Supply :</span>
+              <span className="font-medium">{invoice.place_of_supply || 'Kerala (State Code: 32)'}</span>
             </div>
           </div>
         </div>
 
-        {/* 4. Receiver (Billed To) Details Box */}
-        <div className="p-4 border-b border-[#222222] bg-white text-xs">
-          <div className="font-bold uppercase tracking-wider text-[11px] text-[#222222] mb-1.5 pb-1 border-b border-gray-200">
-            Billed To
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-1 gap-x-6">
-            <div>
-              <span className="text-[#6B7280] mr-2">Name:</span>
-              <span className="font-bold text-sm text-[#222222]">{invoice.customer_name}</span>
+        {/* 4. Parties Grid: Row 2 (Billed To & Shipped To) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 border-b border-[#222222] text-xs">
+          {/* Bottom Left: Receiver (Billed To) */}
+          <div className="p-4 border-b md:border-b-0 md:border-r border-[#222222] bg-white space-y-1.5">
+            <div className="font-bold uppercase tracking-wider text-[11px] text-[#6B7280] pb-1 border-b border-gray-200">
+              Details Of Receiver (Billed To)
             </div>
-            {invoice.customer_mobile && (
-              <div>
-                <span className="text-[#6B7280] mr-2">Mobile:</span>
-                <span className="font-medium">{invoice.customer_mobile}</span>
-              </div>
-            )}
+            <div className="flex">
+              <span className="text-[#6B7280] w-20">Name :</span>
+              <span className="font-bold text-sm text-[#222222]">{invoice.customer_name || '-'}</span>
+            </div>
             {invoice.customer_address && (
-              <div className="sm:col-span-2">
-                <span className="text-[#6B7280] mr-2">Address:</span>
+              <div className="flex">
+                <span className="text-[#6B7280] w-20">Address :</span>
                 <span>{invoice.customer_address}</span>
               </div>
             )}
+            {invoice.customer_mobile && (
+              <div className="flex">
+                <span className="text-[#6B7280] w-20">Mobile :</span>
+                <span className="font-medium">{invoice.customer_mobile}</span>
+              </div>
+            )}
             {invoice.customer_gst_no && (
-              <div>
-                <span className="text-[#6B7280] mr-2">GST No:</span>
+              <div className="flex">
+                <span className="text-[#6B7280] w-20">GST No :</span>
                 <span className="font-mono font-semibold">{invoice.customer_gst_no}</span>
               </div>
             )}
-            <div>
-              <span className="text-[#6B7280] mr-2">State / Code:</span>
+            <div className="flex">
+              <span className="text-[#6B7280] w-20">State :</span>
+              <span>Kerala (32)</span>
+            </div>
+          </div>
+
+          {/* Bottom Right: Consignee (Shipped To) */}
+          <div className="p-4 bg-gray-50/40 space-y-1.5">
+            <div className="font-bold uppercase tracking-wider text-[11px] text-[#6B7280] pb-1 border-b border-gray-200">
+              Details of Consignee (Shipped To)
+            </div>
+            <div className="flex">
+              <span className="text-[#6B7280] w-20">Name :</span>
+              <span className="font-bold text-sm text-[#222222]">{invoice.consignee_name || invoice.customer_name || '-'}</span>
+            </div>
+            <div className="flex">
+              <span className="text-[#6B7280] w-20">Address :</span>
+              <span>{invoice.consignee_address || invoice.customer_address || '-'}</span>
+            </div>
+            {(invoice.consignee_gst_no || invoice.customer_gst_no) && (
+              <div className="flex">
+                <span className="text-[#6B7280] w-20">GST No :</span>
+                <span className="font-mono font-semibold">{invoice.consignee_gst_no || invoice.customer_gst_no}</span>
+              </div>
+            )}
+            <div className="flex">
+              <span className="text-[#6B7280] w-20">State :</span>
               <span>Kerala (32)</span>
             </div>
           </div>

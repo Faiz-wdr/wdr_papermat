@@ -5,7 +5,6 @@ import {
   Edit2,
   CheckCircle,
   FileDown,
-  Printer,
   Building2,
   Calendar,
   Hash,
@@ -140,10 +139,6 @@ export function InvoiceDetail() {
     } finally {
       setPdfLoading(false);
     }
-  };
-
-  const handlePrint = () => {
-    window.print();
   };
 
   const handleDeleteInvoice = async () => {
@@ -299,15 +294,6 @@ export function InvoiceDetail() {
                 onClick={() => navigate(`/invoices/${id}/edit`)}
                 title="Edit Invoice"
                 aria-label="Edit Invoice"
-              />
-
-              <Button
-                variant="secondary"
-                size="icon"
-                icon={Printer}
-                onClick={handlePrint}
-                title="Print invoice on A4 paper"
-                aria-label="Print Invoice"
               />
 
               <Button

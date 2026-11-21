@@ -302,11 +302,16 @@ function formatDateStr(dateVal) {
 
 export function InvoicePDFDocument({ invoice, items = [], businessSettings = {} }) {
   const totalQty = items.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
+  const unroundedTotal = Number(
+    (
+      (Number(invoice?.taxable_value) || 0) +
+      (Number(invoice?.total_cgst) || 0) +
+      (Number(invoice?.total_sgst) || 0)
+    ).toFixed(2)
+  );
   const roundOff = Number(
     (
-      ((Number(invoice?.taxable_value) || 0) +
-        (Number(invoice?.total_cgst) || 0) +
-        (Number(invoice?.total_sgst) || 0)) -
+      unroundedTotal -
       (Number(invoice?.grand_total) || 0)
     ).toFixed(2)
   );
@@ -469,8 +474,8 @@ export function InvoicePDFDocument({ invoice, items = [], businessSettings = {} 
                 <View style={[styles.cellBase, styles.colDesc]}>
                   <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8.5 }}>{item.item_name}</Text>
                 </View>
-                <View style={[styles.cellBase, styles.colHsn]}>
-                  <Text style={{ fontSize: 8.5, textAlign: 'center' }}>{item.hsn_code || '-'}</Text>
+                <View style={[styles.cellBase, styles.colHsn, { alignItems: 'flex-start', paddingLeft: 4 }]}>
+                  <Text style={{ fontSize: 8.5, textAlign: 'left' }}>{item.hsn_code || '-'}</Text>
                 </View>
                 <View style={[styles.cellBase, styles.colQty]}>
                   <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8.5, textAlign: 'center' }}>{item.qty}</Text>
@@ -520,7 +525,7 @@ export function InvoicePDFDocument({ invoice, items = [], businessSettings = {} 
                 <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8.5, textAlign: 'right' }}>{formatNum(invoice?.total_sgst)}</Text>
               </View>
               <View style={[styles.cellBase, styles.colTotal]}>
-                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8.5, textAlign: 'right' }}>{formatNum(invoice?.grand_total)}</Text>
+                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8.5, textAlign: 'right' }}>{formatNum(unroundedTotal)}</Text>
               </View>
             </View>
           </View>

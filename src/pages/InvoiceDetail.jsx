@@ -199,11 +199,13 @@ export function InvoiceDetail() {
 
   const isDraft = invoice.status === 'draft';
   const totalQty = items.reduce((acc, it) => acc + (Number(it.qty) || 0), 0);
+  const unroundedTotal = invoice ? round2(
+    (Number(invoice.taxable_value) || 0) +
+    (Number(invoice.total_cgst) || 0) +
+    (Number(invoice.total_sgst) || 0)
+  ) : 0;
   const roundOff = invoice ? round2(
-    ((Number(invoice.taxable_value) || 0) +
-     (Number(invoice.total_cgst) || 0) +
-     (Number(invoice.total_sgst) || 0)) -
-    (Number(invoice.grand_total) || 0)
+    unroundedTotal - (Number(invoice.grand_total) || 0)
   ) : 0;
 
   return (
@@ -461,7 +463,7 @@ export function InvoiceDetail() {
                 <tr key={item.id || index} className="align-top">
                   <td className="p-2 border-r border-[#222222] text-center">{index + 1}</td>
                   <td className="p-2 border-r border-[#222222] font-semibold text-left">{item.item_name}</td>
-                  <td className="p-2 border-r border-[#222222] text-center font-mono">{item.hsn_code || '-'}</td>
+                  <td className="p-2 border-r border-[#222222] text-left font-mono">{item.hsn_code || '-'}</td>
                   <td className="p-2 border-r border-[#222222] text-center font-bold">{item.qty}</td>
                   <td className="p-2 border-r border-[#222222] text-center">{item.uom}</td>
                   <td className="p-2 border-r border-[#222222] text-right">{Number(item.unit_rate).toFixed(2)}</td>
@@ -500,7 +502,7 @@ export function InvoiceDetail() {
                   {Number(invoice.total_sgst).toFixed(2)}
                 </td>
                 <td className="p-2 text-right text-sm">
-                  {Number(invoice.grand_total).toFixed(2)}
+                  {Number(unroundedTotal).toFixed(2)}
                 </td>
               </tr>
             </tfoot>

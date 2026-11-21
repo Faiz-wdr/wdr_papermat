@@ -9,7 +9,7 @@ const styles = StyleSheet.create({
     paddingBottom: 28,
     paddingHorizontal: 24,
     fontFamily: 'Helvetica',
-    fontSize: 8,
+    fontSize: 9,
     color: '#000000',
     backgroundColor: '#FFFFFF',
     lineHeight: 1.3,
@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#000000',
   },
-  // Header styles
+  // Header styles (kept untouched as requested)
   header: {
     padding: 10,
     textAlign: 'center',
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
   },
   bannerText: {
     fontFamily: 'Helvetica-Bold',
-    fontSize: 9,
+    fontSize: 10,
     letterSpacing: 1,
     textTransform: 'uppercase',
   },
@@ -80,16 +80,16 @@ const styles = StyleSheet.create({
   },
   metaLabel: {
     fontFamily: 'Helvetica-Bold',
-    width: 75,
-    fontSize: 8,
+    width: 80,
+    fontSize: 9,
   },
   metaValue: {
     flex: 1,
-    fontSize: 8,
+    fontSize: 9,
   },
   metaHeading: {
     fontFamily: 'Helvetica-Bold',
-    fontSize: 7.5,
+    fontSize: 8.5,
     textTransform: 'uppercase',
     color: '#4B5563',
     marginBottom: 4,
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   },
   receiverHeader: {
     fontFamily: 'Helvetica-Bold',
-    fontSize: 8,
+    fontSize: 9,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 4,
@@ -129,14 +129,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: '#000000',
     alignItems: 'stretch',
-    minHeight: 20,
+    minHeight: 22,
   },
   tableRow: {
     flexDirection: 'row',
     borderBottomWidth: 0.5,
     borderColor: '#000000',
     alignItems: 'stretch',
-    minHeight: 18,
+    minHeight: 20,
   },
   // Table Cell Base & Column Widths
   cellBase: {
@@ -184,12 +184,12 @@ const styles = StyleSheet.create({
   },
   wordsLabel: {
     fontFamily: 'Helvetica-Bold',
-    fontSize: 7.5,
+    fontSize: 8.5,
     marginBottom: 2,
   },
   wordsBox: {
     fontFamily: 'Helvetica-Oblique',
-    fontSize: 8,
+    fontSize: 9,
     backgroundColor: '#FAFAFA',
     borderWidth: 0.5,
     borderColor: '#D1D5DB',
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
   },
   bankHeader: {
     fontFamily: 'Helvetica-Bold',
-    fontSize: 7.5,
+    fontSize: 8.5,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 3,
@@ -219,16 +219,16 @@ const styles = StyleSheet.create({
   },
   bankLabel: {
     width: 60,
-    fontSize: 7,
+    fontSize: 8,
     color: '#4B5563',
   },
   bankValue: {
     flex: 1,
-    fontSize: 7.5,
+    fontSize: 8.5,
     fontFamily: 'Helvetica-Bold',
   },
   declarationText: {
-    fontSize: 6.5,
+    fontSize: 7.5,
     color: '#4B5563',
     fontFamily: 'Helvetica-Oblique',
   },
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderBottomWidth: 0.5,
     borderColor: '#E5E7EB',
-    fontSize: 8,
+    fontSize: 9,
   },
   grandTotalRow: {
     flexDirection: 'row',
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     backgroundColor: '#F3F4F6',
     fontFamily: 'Helvetica-Bold',
-    fontSize: 9,
+    fontSize: 10,
   },
   signatoryContainer: {
     padding: 8,
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
   },
   signatoryCompany: {
     fontFamily: 'Helvetica-Bold',
-    fontSize: 7.5,
+    fontSize: 8.5,
     textTransform: 'uppercase',
     marginBottom: 26,
     textAlign: 'center',
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
     width: 120,
     textAlign: 'center',
     paddingTop: 2,
-    fontSize: 7,
+    fontSize: 8,
     color: '#4B5563',
   },
   pageFooter: {
@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
     right: 24,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    fontSize: 7,
+    fontSize: 8,
     color: '#6B7280',
   },
 });
@@ -420,34 +420,34 @@ export function InvoicePDFDocument({ invoice, items = [], businessSettings = {} 
             {/* Table Header: fixed repeats this header across multiple pages */}
             <View style={styles.tableHeader} fixed>
               <View style={[styles.cellBase, styles.colNo]}>
-                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 7.5, textAlign: 'center' }}>No</Text>
+                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8.5, textAlign: 'center' }}>No</Text>
               </View>
               <View style={[styles.cellBase, styles.colDesc]}>
-                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 7.5 }}>Description Of Goods</Text>
+                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8.5 }}>Description Of Goods</Text>
               </View>
               <View style={[styles.cellBase, styles.colHsn]}>
-                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 7.5, textAlign: 'center' }}>HSN Code</Text>
+                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8.5, textAlign: 'center' }}>HSN Code</Text>
               </View>
               <View style={[styles.cellBase, styles.colQty]}>
-                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 7.5, textAlign: 'center' }}>Qty</Text>
+                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8.5, textAlign: 'center' }}>Qty</Text>
               </View>
               <View style={[styles.cellBase, styles.colUom]}>
-                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 7.5, textAlign: 'center' }}>UOM</Text>
+                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8.5, textAlign: 'center' }}>UOM</Text>
               </View>
               <View style={[styles.cellBase, styles.colRate]}>
-                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 7.5, textAlign: 'right' }}>Unit Rate</Text>
+                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8.5, textAlign: 'right' }}>Unit Rate</Text>
               </View>
               <View style={[styles.cellBase, styles.colTaxable]}>
-                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 7.5, textAlign: 'right' }}>Taxable Val</Text>
+                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8.5, textAlign: 'right' }}>Taxable Val</Text>
               </View>
               <View style={[styles.cellBase, styles.colCgst]}>
-                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 7.5, textAlign: 'right' }}>CGST</Text>
+                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8.5, textAlign: 'right' }}>CGST</Text>
               </View>
               <View style={[styles.cellBase, styles.colSgst]}>
-                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 7.5, textAlign: 'right' }}>SGST</Text>
+                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8.5, textAlign: 'right' }}>SGST</Text>
               </View>
               <View style={[styles.cellBase, styles.colTotal]}>
-                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 7.5, textAlign: 'right' }}>Total</Text>
+                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8.5, textAlign: 'right' }}>Total</Text>
               </View>
             </View>
 
@@ -455,36 +455,36 @@ export function InvoicePDFDocument({ invoice, items = [], businessSettings = {} 
             {items.map((item, index) => (
               <View key={item.id || index} style={styles.tableRow} wrap={false}>
                 <View style={[styles.cellBase, styles.colNo]}>
-                  <Text style={{ fontSize: 7.5, textAlign: 'center' }}>{index + 1}</Text>
+                  <Text style={{ fontSize: 8.5, textAlign: 'center' }}>{index + 1}</Text>
                 </View>
                 <View style={[styles.cellBase, styles.colDesc]}>
-                  <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 7.5 }}>{item.item_name}</Text>
+                  <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8.5 }}>{item.item_name}</Text>
                 </View>
                 <View style={[styles.cellBase, styles.colHsn]}>
-                  <Text style={{ fontSize: 7.5, textAlign: 'center' }}>{item.hsn_code || '-'}</Text>
+                  <Text style={{ fontSize: 8.5, textAlign: 'center' }}>{item.hsn_code || '-'}</Text>
                 </View>
                 <View style={[styles.cellBase, styles.colQty]}>
-                  <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 7.5, textAlign: 'center' }}>{item.qty}</Text>
+                  <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8.5, textAlign: 'center' }}>{item.qty}</Text>
                 </View>
                 <View style={[styles.cellBase, styles.colUom]}>
-                  <Text style={{ fontSize: 7.5, textAlign: 'center' }}>{item.uom || 'PCS'}</Text>
+                  <Text style={{ fontSize: 8.5, textAlign: 'center' }}>{item.uom || 'PCS'}</Text>
                 </View>
                 <View style={[styles.cellBase, styles.colRate]}>
-                  <Text style={{ fontSize: 7.5, textAlign: 'right' }}>{formatNum(item.unit_rate)}</Text>
+                  <Text style={{ fontSize: 8.5, textAlign: 'right' }}>{formatNum(item.unit_rate)}</Text>
                 </View>
                 <View style={[styles.cellBase, styles.colTaxable]}>
-                  <Text style={{ fontSize: 7.5, textAlign: 'right' }}>{formatNum(item.taxable_value)}</Text>
+                  <Text style={{ fontSize: 8.5, textAlign: 'right' }}>{formatNum(item.taxable_value)}</Text>
                 </View>
                 <View style={[styles.cellBase, styles.colCgst]}>
-                  <Text style={{ fontSize: 7.5, textAlign: 'right' }}>{formatNum(item.cgst_amount)}</Text>
-                  <Text style={{ fontSize: 6, color: '#4B5563', textAlign: 'right' }}>({item.cgst_rate}%)</Text>
+                  <Text style={{ fontSize: 8.5, textAlign: 'right' }}>{formatNum(item.cgst_amount)}</Text>
+                  <Text style={{ fontSize: 7, color: '#4B5563', textAlign: 'right' }}>({item.cgst_rate}%)</Text>
                 </View>
                 <View style={[styles.cellBase, styles.colSgst]}>
-                  <Text style={{ fontSize: 7.5, textAlign: 'right' }}>{formatNum(item.sgst_amount)}</Text>
-                  <Text style={{ fontSize: 6, color: '#4B5563', textAlign: 'right' }}>({item.sgst_rate}%)</Text>
+                  <Text style={{ fontSize: 8.5, textAlign: 'right' }}>{formatNum(item.sgst_amount)}</Text>
+                  <Text style={{ fontSize: 7, color: '#4B5563', textAlign: 'right' }}>({item.sgst_rate}%)</Text>
                 </View>
                 <View style={[styles.cellBase, styles.colTotal]}>
-                  <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 7.5, textAlign: 'right' }}>{formatNum(item.total)}</Text>
+                  <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8.5, textAlign: 'right' }}>{formatNum(item.total)}</Text>
                 </View>
               </View>
             ))}
@@ -493,25 +493,25 @@ export function InvoicePDFDocument({ invoice, items = [], businessSettings = {} 
             <View style={styles.tableTotalRow} wrap={false}>
               <View style={[styles.cellBase, styles.colNo, { borderRightWidth: 0 }]} />
               <View style={[styles.cellBase, styles.colDesc, { alignItems: 'center' }]}>
-                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 7.5 }}>TOTAL</Text>
+                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8.5 }}>TOTAL</Text>
               </View>
               <View style={[styles.cellBase, styles.colHsn]} />
               <View style={[styles.cellBase, styles.colQty]}>
-                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 7.5, textAlign: 'center' }}>{totalQty}</Text>
+                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8.5, textAlign: 'center' }}>{totalQty}</Text>
               </View>
               <View style={[styles.cellBase, styles.colUom]} />
               <View style={[styles.cellBase, styles.colRate]} />
               <View style={[styles.cellBase, styles.colTaxable]}>
-                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 7.5, textAlign: 'right' }}>{formatNum(invoice?.taxable_value)}</Text>
+                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8.5, textAlign: 'right' }}>{formatNum(invoice?.taxable_value)}</Text>
               </View>
               <View style={[styles.cellBase, styles.colCgst]}>
-                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 7.5, textAlign: 'right' }}>{formatNum(invoice?.total_cgst)}</Text>
+                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8.5, textAlign: 'right' }}>{formatNum(invoice?.total_cgst)}</Text>
               </View>
               <View style={[styles.cellBase, styles.colSgst]}>
-                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 7.5, textAlign: 'right' }}>{formatNum(invoice?.total_sgst)}</Text>
+                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8.5, textAlign: 'right' }}>{formatNum(invoice?.total_sgst)}</Text>
               </View>
               <View style={[styles.cellBase, styles.colTotal]}>
-                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 7.5, textAlign: 'right' }}>{formatNum(invoice?.grand_total)}</Text>
+                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8.5, textAlign: 'right' }}>{formatNum(invoice?.grand_total)}</Text>
               </View>
             </View>
           </View>

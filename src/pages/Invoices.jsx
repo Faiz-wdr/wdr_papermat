@@ -301,46 +301,6 @@ export function Invoices() {
 
       {/* Main Table / State Container */}
       <div className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden shadow-xs">
-        {/* Mobile & Desktop Sticky Top Selection Bar */}
-        {selectedIds.length > 0 && (
-          <div className="bg-red-50 border-b border-red-200 px-4 py-3 flex items-center justify-between gap-3 animate-in fade-in duration-150 sticky top-0 z-20">
-            <div className="flex items-center gap-2.5">
-              <input
-                type="checkbox"
-                checked={filteredInvoices.length > 0 && selectedIds.length === filteredInvoices.length}
-                onChange={handleToggleSelectAll}
-                className="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500 cursor-pointer shrink-0"
-                title={selectedIds.length === filteredInvoices.length ? "Deselect all" : "Select all"}
-                aria-label="Select all invoices"
-              />
-              <span className="text-xs sm:text-sm font-semibold text-red-900">
-                {selectedIds.length} {selectedIds.length === 1 ? 'invoice selected' : 'invoices selected'}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="secondary"
-                size="compact"
-                onClick={() => setSelectedIds([])}
-                className="text-xs font-medium"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                variant="danger"
-                size="compact"
-                icon={Trash2}
-                onClick={() => setIsDeleteModalOpen(true)}
-                className="bg-red-600 hover:bg-red-700 text-white border-transparent text-xs font-semibold whitespace-nowrap shadow-xs"
-              >
-                {selectedIds.length > 1 ? `Delete All (${selectedIds.length})` : 'Delete (1)'}
-              </Button>
-            </div>
-          </div>
-        )}
-
         {loading ? (
           <div className="p-12 text-center text-sm text-[#6B7280]">
             <div className="w-8 h-8 border-2 border-[#358FFF] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>

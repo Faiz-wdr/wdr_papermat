@@ -360,15 +360,11 @@ export function InvoicePDFDocument({ invoice, items = [], businessSettings = {} 
               <Text style={styles.metaHeading}>Transportation Mode</Text>
               <View style={styles.metaRow}>
                 <Text style={[styles.metaLabel, { width: 120 }]}>Vehicle No. :</Text>
-                <Text style={styles.metaValue}>{invoice?.vehicle_no || '-'}</Text>
+                <Text style={styles.metaValue}>{invoice?.vehicle_no || ''}</Text>
               </View>
               <View style={styles.metaRow}>
                 <Text style={[styles.metaLabel, { width: 120 }]}>Date & Time of Supply :</Text>
-                <Text style={styles.metaValue}>{formatDateStr(invoice?.supply_date || invoice?.invoice_date)}</Text>
-              </View>
-              <View style={styles.metaRow}>
-                <Text style={[styles.metaLabel, { width: 120 }]}>Place of Supply :</Text>
-                <Text style={styles.metaValue}>{invoice?.place_of_supply || 'Kerala (State Code: 32)'}</Text>
+                <Text style={styles.metaValue}>{invoice?.supply_date ? formatDateStr(invoice.supply_date) : ''}</Text>
               </View>
             </View>
           </View>
@@ -416,26 +412,14 @@ export function InvoicePDFDocument({ invoice, items = [], businessSettings = {} 
               <View style={styles.metaRow}>
                 <Text style={[styles.metaLabel, { width: 55 }]}>Name :</Text>
                 <Text style={[styles.metaValue, { fontFamily: 'Helvetica-Bold' }]}>
-                  {invoice?.consignee_name || invoice?.customer_name || '-'}
+                  {invoice?.consignee_name || ''}
                 </Text>
               </View>
               <View style={styles.metaRow}>
                 <Text style={[styles.metaLabel, { width: 55 }]}>Address :</Text>
                 <Text style={styles.metaValue}>
-                  {invoice?.consignee_address || invoice?.customer_address || '-'}
+                  {invoice?.consignee_address || ''}
                 </Text>
-              </View>
-              {Boolean(invoice?.consignee_gst_no || invoice?.customer_gst_no) && (
-                <View style={styles.metaRow}>
-                  <Text style={[styles.metaLabel, { width: 55 }]}>GST No :</Text>
-                  <Text style={[styles.metaValue, { fontFamily: 'Helvetica-Bold' }]}>
-                    {invoice?.consignee_gst_no || invoice?.customer_gst_no}
-                  </Text>
-                </View>
-              )}
-              <View style={styles.metaRow}>
-                <Text style={[styles.metaLabel, { width: 55 }]}>State :</Text>
-                <Text style={styles.metaValue}>Kerala (32)</Text>
               </View>
             </View>
           </View>

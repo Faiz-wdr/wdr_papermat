@@ -379,15 +379,11 @@ export function InvoiceDetail() {
             </div>
             <div className="flex">
               <span className="text-[#6B7280] w-40">Vehicle No. :</span>
-              <span className="font-medium">{invoice.vehicle_no || '-'}</span>
+              <span className="font-medium">{invoice.vehicle_no || ''}</span>
             </div>
             <div className="flex">
               <span className="text-[#6B7280] w-40">Date & Time of Supply :</span>
-              <span className="font-medium">{formatDate(invoice.supply_date || invoice.invoice_date)}</span>
-            </div>
-            <div className="flex">
-              <span className="text-[#6B7280] w-40">Place of Supply :</span>
-              <span className="font-medium">{invoice.place_of_supply || 'Kerala (State Code: 32)'}</span>
+              <span className="font-medium">{invoice.supply_date ? formatDate(invoice.supply_date) : ''}</span>
             </div>
           </div>
         </div>
@@ -434,21 +430,11 @@ export function InvoiceDetail() {
             </div>
             <div className="flex">
               <span className="text-[#6B7280] w-20">Name :</span>
-              <span className="font-bold text-sm text-[#222222]">{invoice.consignee_name || invoice.customer_name || '-'}</span>
+              <span className="font-bold text-sm text-[#222222]">{invoice.consignee_name || ''}</span>
             </div>
             <div className="flex">
               <span className="text-[#6B7280] w-20">Address :</span>
-              <span>{invoice.consignee_address || invoice.customer_address || '-'}</span>
-            </div>
-            {(invoice.consignee_gst_no || invoice.customer_gst_no) && (
-              <div className="flex">
-                <span className="text-[#6B7280] w-20">GST No :</span>
-                <span className="font-mono font-semibold">{invoice.consignee_gst_no || invoice.customer_gst_no}</span>
-              </div>
-            )}
-            <div className="flex">
-              <span className="text-[#6B7280] w-20">State :</span>
-              <span>Kerala (32)</span>
+              <span>{invoice.consignee_address || ''}</span>
             </div>
           </div>
         </div>

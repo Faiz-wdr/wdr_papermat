@@ -357,9 +357,9 @@ export function InvoiceDetail() {
         </div>
 
         {/* 3. Top Boxed Details Grid: Row 1 (Invoice Metadata & Transportation Mode) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 border-b border-[#222222] text-xs">
+        <div className="invoice-2col-grid grid grid-cols-1 sm:grid-cols-2 print:grid-cols-2 border-b border-[#222222] text-xs">
           {/* Top Left: Invoice Metadata */}
-          <div className="p-4 border-b md:border-b-0 md:border-r border-[#222222] space-y-1.5 bg-white">
+          <div className="invoice-col-left p-4 border-b sm:border-b-0 sm:border-r print:border-b-0 print:border-r border-[#222222] space-y-1.5 bg-white">
             <div className="flex">
               <span className="font-bold w-28">GST No :</span>
               <span className="font-mono font-semibold">{businessSettings?.gst_no || '32ABCDE1234F1Z5'}</span>
@@ -391,9 +391,9 @@ export function InvoiceDetail() {
         </div>
 
         {/* 4. Parties Grid: Row 2 (Billed To & Shipped To) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 border-b border-[#222222] text-xs">
+        <div className="invoice-2col-grid grid grid-cols-1 sm:grid-cols-2 print:grid-cols-2 border-b border-[#222222] text-xs">
           {/* Bottom Left: Receiver (Billed To) */}
-          <div className="p-4 border-b md:border-b-0 md:border-r border-[#222222] bg-white space-y-1.5">
+          <div className="invoice-col-left p-4 border-b sm:border-b-0 sm:border-r print:border-b-0 print:border-r border-[#222222] bg-white space-y-1.5">
             <div className="font-bold uppercase tracking-wider text-[11px] text-[#6B7280] pb-1 border-b border-gray-200">
               Details Of Receiver (Billed To)
             </div>
@@ -510,9 +510,9 @@ export function InvoiceDetail() {
         </div>
 
         {/* 6. Footer Section: Words, Bank Details, and Signatory */}
-        <div className="invoice-footer-section grid grid-cols-1 md:grid-cols-2 text-xs">
+        <div className="invoice-footer-section invoice-2col-grid grid grid-cols-1 sm:grid-cols-2 print:grid-cols-2 text-xs">
           {/* Left Column */}
-          <div className="p-4 border-b md:border-b-0 md:border-r border-[#222222] flex flex-col justify-between space-y-4">
+          <div className="invoice-col-left p-4 border-b sm:border-b-0 sm:border-r print:border-b-0 print:border-r border-[#222222] flex flex-col justify-between space-y-4">
             <div>
               <div className="font-semibold text-xs mb-1">Total Amount in Words:</div>
               <div className="font-bold italic text-sm text-[#222222] bg-gray-50 p-2 border border-gray-300">

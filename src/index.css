@@ -91,6 +91,20 @@
     page-break-inside: auto;
   }
 
+  /* Ensure 2-column grid layout remains strictly 2 columns when printing */
+  .invoice-document .invoice-2col-grid,
+  .invoice-2col-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .invoice-document .invoice-col-left,
+  .invoice-col-left {
+    border-bottom-width: 0 !important;
+    border-right-width: 1px !important;
+    border-right-color: #222222 !important;
+  }
+
   /* Table formatting for clean multi-page pagination */
   table {
     border-collapse: collapse !important;
